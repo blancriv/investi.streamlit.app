@@ -88,6 +88,103 @@ st.dataframe(df.head())
 df.columns = [c.strip() for c in df.columns]
 df.columns = [c.lower() for c in df.columns]
 
+# ============================================================
+#           🟦 TABLERO GENERAL – INVESTIDATA
+# ============================================================
+import altair as alt
+
+st.markdown("## 📊 Tablero General de Análisis")
+
+# Crear columnas para tarjetas tipo KPI
+kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+
+# KPI 1 → Total registros
+kpi1.metric(
+    label="📁 Total de registros",
+    value=f"{len(df):,}"
+)
+
+# KPI 2 → Total números detectados
+all_text_tab = " ".join(df.astype(str).values.flatten())
+numbers_tab = re.findall(r"\b(?:\+?\d{7,15}|\d{7,15})\b", all_text_tab)
+kpi2.metric(
+    label="📞 Total números detectados",
+    value=len(numbers_tab)
+)
+
+# KPI 3 → Palabra más frecuente
+words = re.findall(r"\b[a-zA-ZáéíóúñÁÉÍÓÚÑ]{3,}\b", all_text_tab.lower())
+word_counts = Counter(words)
+top_word, freq_word = word_counts.most_common(1)[0]
+kpi3.metric(
+    label="🔠 Palabra más repetida",
+    value=top_word,
+    delta=f"{freq_word} veces"
+)
+
+# KPI 4 → Fecha más activa
+if "fecha" in df.columns:
+    df["fecha"] = pd.to_datetime(df["fecha"], errors="coerce")
+    fecha_counts = df["fecha"].value_counts().sort_values(ascending=False)
+    if not fecha_counts.empty:
+        kpi4.metric(
+            label="📅 Fecha con más actividad",
+            value=str(fecha_counts.index[0].date()),
+            delta=f"{fecha_counts.iloc[0]} registros"
+        )
+else:
+    kpi4.metric("📅 Fecha activa", "No disponible")
+
+# ============================================================
+# GRÁFICOS ALTOS CALIDAD – AUTOMÁTICOS
+# ============================================================
+
+st.markdown("### 📈 Actividad por fechas")
+if "fecha" in df.columns:
+    chart_fecha = alt.Chart(df.dropna(subset=["fecha"])).mark_line().encode(
+        x='fecha:T',
+        y='count()',
+        tooltip=['fecha:T', 'count()']
+    ).properties(
+        width='container',
+        height=250
+    )
+    st.altair_chart(chart_fecha, use_container_width=True)
+else:
+    st.info("No existen datos de fecha para graficar actividad temporal.")
+
+# ============================================================
+
+st.markdown("### 🔢 Números más mencionados")
+df_nums = pd.DataFrame(Counter(numbers_tab).most_common(15), columns=["Número", "Frecuencia"])
+
+chart_nums = alt.Chart(df_nums).mark_bar().encode(
+    x='Número:N',
+    y='Frecuencia:Q',
+    tooltip=['Número', 'Frecuencia']
+).properties(
+    width='container',
+    height=250
+)
+
+st.altair_chart(chart_nums, use_container_width=True)
+
+# ============================================================
+
+st.markdown("### 🔡 Palabras más frecuentes")
+df_words = pd.DataFrame(word_counts.most_common(20), columns=["Palabra", "Frecuencia"])
+
+chart_words = alt.Chart(df_words).mark_bar().encode(
+    x='Palabra:N',
+    y='Frecuencia:Q',
+    tooltip=['Palabra', 'Frecuencia']
+).properties(
+    width='container',
+    height=250
+)
+
+st.altair_chart(chart_words, use_container_width=True)
+
 # -----------------------------------------------------------
 # FILTROS RÁPIDOS
 # -----------------------------------------------------------
