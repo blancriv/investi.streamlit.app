@@ -12,6 +12,33 @@ st.set_page_config(
     page_title="InvestiData - Análisis Forense",
     layout="wide"
 )
+# ============================================================
+#                   ESTILO PERSONALIZADO
+# ============================================================
+st.markdown("""
+<style>
+
+    /* Bordes suaves de las tarjetas */
+    .metric-container {
+        border: 1px solid #E0E0E0;
+        border-radius: 10px;
+        padding: 10px;
+        background: #FAFAFA;
+    }
+
+    /* Quitar el fondo feo del sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #F5F7FF;
+    }
+
+    /* Títulos más lindos */
+    h1, h2, h3 {
+        font-family: 'Segoe UI', sans-serif;
+        font-weight: 600;
+    }
+
+</style>
+""", unsafe_allow_html=True)
 
 DEFAULT_FILE = "/mnt/data/202500019_2025-06-26_Informe.xlsx"
 
