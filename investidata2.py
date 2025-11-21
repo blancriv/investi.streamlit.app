@@ -7,8 +7,6 @@ Original file is located at
     https://colab.research.google.com/drive/154ZRsJmuqyrc5YizTmUvI6K1TRMMBO_N
 """
 
-## Instalar dependencias
-!pip install streamlit pyngrok pandas openpyxl
 
 ## configurar Ngrok
 from pyngrok import ngrok
