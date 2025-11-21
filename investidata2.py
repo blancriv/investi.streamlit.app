@@ -51,33 +51,70 @@ st.write("Mapas, palabras clave, nombres propios, grafo de contactos y más.")
 # -----------------------------------------------------------
 # SUBIR ARCHIVO
 # -----------------------------------------------------------
-uploaded_file = st.file_uploader("📂 Cargar archivo XLSX", type=["xlsx"])
-use_default = st.checkbox("Usar archivo integrado (si no subo archivo)", value=False)
+# ===============================
+# 📂 SUBIR ARCHIVO Y LEER HOJAS
+# ===============================
 
-# -----------------------------------------------------------
-# PERFIL DEL DISPOSITIVO — LADO DERECHO
-# -----------------------------------------------------------
-col_left, col_right = st.columns([3, 1])
+uploaded_file = st.file_uploader("📂 Cargar archivo forense XLSX", type=["xlsx"])
 
-with col_right:
-    st.markdown("### 🟦 Perfil del Dispositivo")
-    st.markdown(
-        """
-        <div style="font-size: 13px; line-height: 1.3; padding: 8px;
-                    border: 1px solid #2980b9; border-radius: 8px;">
-        📱 <b>Moto G24 – Motorola</b><br>
-        📧 <b>herreragus1976@gmail.com</b><br>
-        💬 <b>+57 311 252 8641 – “Calvin Klein”</b><br>
-        🔢 <b>IMEI:</b><br>
-        &nbsp;&nbsp;• 354102943867594<br>
-        &nbsp;&nbsp;• 354102943902490<br>
-        🎨 <b>Color:</b> Gris<br>
-        🧩 <b>SIM:</b> 1 encontrada<br>
-        🛠 <b>Estado:</b> Bueno<br>
+if uploaded_file is None:
+    st.info("🔎 Esperando archivo... (Sube un XLSX para iniciar el análisis)")
+    st.stop()
+
+# Cargar el libro
+try:
+    xls = pd.ExcelFile(uploaded_file)
+    st.success("✔ Archivo cargado correctamente.")
+except Exception as e:
+    st.error(f"❌ Error leyendo el archivo: {e}")
+    st.stop()
+
+# Detectar hojas
+hojas = xls.sheet_names
+
+# Buscar hojas por nombre
+def find_sheet(keyword):
+    return next((h for h in hojas if keyword.lower() in h.lower()), None)
+
+hoja_resumen = find_sheet("resumen")
+hoja_apps = find_sheet("aplic")
+hoja_conversaciones = find_sheet("convers")
+hoja_cuentas = find_sheet("cuenta")
+
+# ===============================
+# 🟦 PERFIL DEL DISPOSITIVO
+# ===============================
+if hoja_resumen:
+    df_resumen = xls.parse(hoja_resumen)
+
+    st.markdown("## 📱 Perfil del Dispositivo")
+
+    try:
+        marca = df_resumen.iloc[0]["Marca"]
+        modelo = df_resumen.iloc[0]["Modelo"]
+        color = df_resumen.iloc[0]["Color"]
+        imei1 = df_resumen.iloc[0]["IMEI1"]
+        imei2 = df_resumen.iloc[0]["IMEI2"]
+        correo = df_resumen.iloc[0]["Correo"]
+        estado = df_resumen.iloc[0]["Estado"]
+        sim = df_resumen.iloc[0]["SIM"]
+
+        st.markdown(f"""
+        <div style="border:1px solid #1a73e8; padding:10px; border-radius:10px;">
+        📱 <b>{marca} – {modelo}</b><br>
+        🎨 <b>Color:</b> {color}<br>
+        🔢 <b>IMEI:</b><br>• {imei1}<br>• {imei2}<br>
+        📧 <b>Correo asociado:</b> {correo}<br>
+        🧩 <b>SIM detectada:</b> {sim}<br>
+        🛠 <b>Estado:</b> {estado}
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+        """, unsafe_allow_html=True)
+
+    except:
+        st.warning("⚠ No se encontraron todos los campos del perfil del dispositivo.")
+else:
+    st.warning("⚠ No existe hoja 'Resumen' en el archivo.")
+
 
 # -----------------------------------------------------------
 # LEER ARCHIVO
@@ -101,6 +138,77 @@ elif use_default:
 else:
     st.info("Sube un archivo o activa 'Usar archivo integrado'.")
     st.stop()
+
+# ===============================
+# 📱 PANEL DE APLICACIONES
+# ===============================
+if hoja_apps:
+    df_apps = xls.parse(hoja_apps)
+
+    st.markdown("## 📲 Aplicaciones Instaladas")
+
+    st.dataframe(df_apps)
+
+    st.markdown("### 🔍 Estadísticas:")
+    st.write(f"Total de apps instaladas: **{len(df_apps)}**")
+
+    if "Tipo" in df_apps.columns:
+        st.bar_chart(df_apps["Tipo"].value_counts())
+
+else:
+    st.info("ℹ No se encontró una hoja de aplicaciones.")
+# ===============================
+# 💬 ANÁLISIS DE CONVERSACIONES
+# ===============================
+if hoja_conversaciones:
+    df_chat = xls.parse(hoja_conversaciones)
+
+    st.markdown("## 💬 Análisis de Conversaciones")
+
+    # Filtros
+    col1, col2 = st.columns(2)
+    with col1:
+        contacto = st.text_input("Filtrar por contacto / número")
+
+    with col2:
+        palabra = st.text_input("Buscar palabra en chats")
+
+    df_filtrado = df_chat.copy()
+
+    if contacto:
+        df_filtrado = df_filtrado[df_filtrado.astype(str).apply(lambda row: row.str.contains(contacto, case=False).any(), axis=1)]
+
+    if palabra:
+        df_filtrado = df_filtrado[df_filtrado.astype(str).apply(lambda row: row.str.contains(palabra, case=False).any(), axis=1)]
+
+    st.dataframe(df_filtrado.head(200))
+
+    # Análisis numérico
+    mensajes = " ".join(df_chat.astype(str).values.flatten())
+    numeros = re.findall(r"\b\d{7,15}\b", mensajes)
+    numeros_comunes = Counter(numeros).most_common(10)
+
+    st.markdown("### 🔢 Números más mencionados")
+    st.write(pd.DataFrame(numeros_comunes, columns=["Número", "Frecuencia"]))
+
+else:
+    st.info("ℹ No se encontró una hoja de conversaciones.")
+# ===============================
+# 👤 CUENTAS DEL PROPIETARIO
+# ===============================
+if hoja_cuentas:
+    df_cuentas = xls.parse(hoja_cuentas)
+
+    st.markdown("## 👤 Cuentas del Propietario (Redes y Apps)")
+
+    st.dataframe(df_cuentas)
+
+    if "Aplicación" in df_cuentas.columns:
+        st.markdown("### 📊 Cuentas por Aplicación")
+        st.bar_chart(df_cuentas["Aplicación"].value_counts())
+
+else:
+    st.info("ℹ No se encontró una hoja de cuentas.")
 
 # -----------------------------------------------------------
 # SELECCIÓN DE HOJA
