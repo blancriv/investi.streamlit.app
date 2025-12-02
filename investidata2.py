@@ -87,7 +87,7 @@ KEYWORDS_ALERTS = {
 # FUNCIONES AUXILIARES
 # ================================
 
-@st.cache_data
+@st.cache_resource # <--- CAMBIO CLAVE: Usamos cache_resource para objetos ExcelFile
 def load_excel(file):
     """Carga el archivo Excel en caché para optimizar rendimiento."""
     # Usar engine='openpyxl' es esencial para archivos XLSX modernos
