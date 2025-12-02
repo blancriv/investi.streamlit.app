@@ -3,8 +3,6 @@ import streamlit.components.v1 as components
 
 # -----------------------------------------------------------------------------
 # 1. DEFINICIÓN SEGURA DE VALORES CSS EN PYTHON 
-# Todos los valores decimales (0.X) DEBEN estar en cadenas de una sola línea 
-# para evitar el error 'invalid decimal literal' al parsear la cadena HTML.
 # -----------------------------------------------------------------------------
 
 # Sombras 
@@ -59,6 +57,7 @@ HTML_TEMPLATE = """
         .card-shadow {
             /* INYECTADO: Sombra con 0.1 y 0.06 */
             {DEFAULT_SHADOW}
+            /* Marcadores de posición CSS */
             transition: transform {TRANSITION_SHORT}, box-shadow {TRANSITION_SHORT};
         }
         .card-shadow:hover {
@@ -710,18 +709,20 @@ HTML_TEMPLATE = """
 
 # --------------------------------------------------------------------------------
 # 3. Renderizado del HTML en Streamlit (Usa .format() para inyectar los valores)
+#    AQUÍ ESTÁ LA CORRECCIÓN CLAVE: Asegurar que los nombres de los argumentos 
+#    en Python coincidan con los placeholders en la plantilla HTML.
 # --------------------------------------------------------------------------------
 st.set_page_config(layout="wide")
 
 # Sustituimos TODOS los placeholders con las cadenas CSS/JS definidas de forma segura.
+# Los nombres de los argumentos deben coincidir EXACTAMENTE con los placeholders en HTML_TEMPLATE.
 FINAL_HTML = HTML_TEMPLATE.format(
     DEFAULT_SHADOW=DEFAULT_SHADOW_CSS,
     HOVER_SHADOW=HOVER_SHADOW_CSS,
-    TRANSITION_SHORT=TRANSITION_TIME_SHORT,
-    TRANSITION_MEDIUM=TRANSITION_TIME_MEDIUM,
-    FONT_SIZE=FONT_SIZE_TOOLTIP,
-    # El nuevo placeholder TOOLTIP_OPACITY se usa en el JS para D3.js
-    TOOLTIP_OPACITY=TOOLTIP_OPACITY_VAL 
+    TRANSITION_SHORT=TRANSITION_TIME_SHORT, # Coincide con {TRANSITION_SHORT} en CSS
+    TRANSITION_MEDIUM=TRANSITION_TIME_MEDIUM, # Coincide con {TRANSITION_MEDIUM} en CSS
+    FONT_SIZE=FONT_SIZE_TOOLTIP, # Coincide con {FONT_SIZE} en CSS
+    TOOLTIP_OPACITY=TOOLTIP_OPACITY_VAL # Coincide con {TOOLTIP_OPACITY} en JS
 )
 
 components.html(
