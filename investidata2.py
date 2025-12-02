@@ -10,7 +10,7 @@ import re
 # CONFIGURACIÓN GENERAL
 # -----------------------------------------------------------
 st.set_page_config(
-    page_title="InvestiData - Análisis Forense",
+    page_title="InvestiData - Análisis Forense BR",
     layout="wide"
 )
 
