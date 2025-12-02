@@ -62,9 +62,11 @@ def detect_sheet(xls, keywords):
                 return name
     return None
 
-@st.cache_data(show_spinner=False)
-def load_excel(file) -> pd.ExcelFile:
-    return pd.ExcelFile(file)
+@st.cache_data(show_spinner=True)
+def load_excel(file):
+    xls = pd.ExcelFile(file)
+    dataframes = {sheet: xls.parse(sheet) for sheet in xls.sheet_names}
+    return dataframes
 
 @st.cache_data(show_spinner=False)
 def parse_sheet(xls, sheet_name):
