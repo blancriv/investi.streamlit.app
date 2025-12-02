@@ -2,24 +2,24 @@ import streamlit as st
 import streamlit.components.v1 as components
 
 # -----------------------------------------------------------------------------
-# 1. DEFINICIÓN SEGURA DE VALORES CSS EN PYTHON (CRÍTICO)
-# Estos valores contienen decimales con el formato 0.X y DEBEN estar en cadenas
-# de una sola línea para evitar el error 'invalid decimal literal' en Python.
+# 1. DEFINICIÓN SEGURA DE VALORES CSS EN PYTHON 
+# Todos los valores decimales (0.X) DEBEN estar en cadenas de una sola línea 
+# para evitar el error 'invalid decimal literal' al parsear la cadena HTML.
 # -----------------------------------------------------------------------------
 
-# Sombras (las líneas originales problemáticas)
+# Sombras 
 DEFAULT_SHADOW_CSS = "box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);"
 HOVER_SHADOW_CSS = "box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);"
 
-# Tiempos de Transición (0.2s y 0.3s)
+# Tiempos de Transición 
 TRANSITION_TIME_SHORT = "0.2s"
 TRANSITION_TIME_MEDIUM = "0.3s"
 
-# Tamaño de Fuente Tooltip (0.875rem)
+# Tamaño de Fuente Tooltip 
 FONT_SIZE_TOOLTIP = "0.875rem"
 
-# Opacidad (0.9)
-TOOLTIP_OPACITY = "0.9"
+# Opacidad (Se usará en la inyección de JavaScript/D3)
+TOOLTIP_OPACITY_VAL = "0.9" 
 
 
 # -----------------------------------------------------------------------------
@@ -256,7 +256,7 @@ HTML_TEMPLATE = """
         import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Establecer nivel de log para depuración de Firestore
-        setLogLevel('error'); // Se cambia a 'error' para evitar inundar la consola
+        setLogLevel('error'); 
 
         // Variables Globales
         let app;
@@ -606,7 +606,8 @@ HTML_TEMPLATE = """
                     d3.select(this).attr("fill", "#1a56db"); // Hover color
                     tooltip.transition()
                         .duration(200)
-                        .style("opacity", 0.9); // Usar el valor fijo aquí
+                        // INYECTADO: Opacidad de hover
+                        .style("opacity", {TOOLTIP_OPACITY}); 
                     tooltip.html(`Coincidencias: <strong>${d.count}</strong>`)
                         .style("left", (event.pageX + 10) + "px")
                         .style("top", (event.pageY - 28) + "px");
@@ -712,14 +713,15 @@ HTML_TEMPLATE = """
 # --------------------------------------------------------------------------------
 st.set_page_config(layout="wide")
 
-# Sustituimos TODOS los placeholders con las cadenas CSS definidas de forma segura.
+# Sustituimos TODOS los placeholders con las cadenas CSS/JS definidas de forma segura.
 FINAL_HTML = HTML_TEMPLATE.format(
     DEFAULT_SHADOW=DEFAULT_SHADOW_CSS,
     HOVER_SHADOW=HOVER_SHADOW_CSS,
     TRANSITION_SHORT=TRANSITION_TIME_SHORT,
     TRANSITION_MEDIUM=TRANSITION_TIME_MEDIUM,
     FONT_SIZE=FONT_SIZE_TOOLTIP,
-    TOOLTIP_OPACITY=TOOLTIP_OPACITY
+    # El nuevo placeholder TOOLTIP_OPACITY se usa en el JS para D3.js
+    TOOLTIP_OPACITY=TOOLTIP_OPACITY_VAL 
 )
 
 components.html(
