@@ -606,7 +606,7 @@ HTML_TEMPLATE = """
                     tooltip.transition()
                         .duration(200)
                         // INYECTADO: Opacidad de hover
-                        .style("opacity", {TOOLTIP_OPACITY}); 
+                        .style("opacity", "{TOOLTIP_OPACITY}"); 
                     tooltip.html(`Coincidencias: <strong>${d.count}</strong>`)
                         .style("left", (event.pageX + 10) + "px")
                         .style("top", (event.pageY - 28) + "px");
@@ -709,8 +709,8 @@ HTML_TEMPLATE = """
 
 # --------------------------------------------------------------------------------
 # 3. Renderizado del HTML en Streamlit (Usa .format() para inyectar los valores)
-#    AQUÍ ESTÁ LA CORRECCIÓN CLAVE: Asegurar que los nombres de los argumentos 
-#    en Python coincidan con los placeholders en la plantilla HTML.
+#    CORRECCIÓN CLAVE: Asegurar que los nombres de los argumentos en Python
+#    coincidan EXACTAMENTE con los placeholders en la plantilla HTML.
 # --------------------------------------------------------------------------------
 st.set_page_config(layout="wide")
 
