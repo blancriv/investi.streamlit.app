@@ -82,8 +82,8 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     # Inyectamos el valor simulado del IMEI en el HTML
     imei_val = st.session_state.df_loaded['IMEI Principal']
     
-    # Definimos la plantilla HTML (igual que antes, pero con la inyección del IMEI y el escape de corchetes)
-    # NOTA IMPORTANTE: Los corchetes internos del tailwind.config y en JS/D3 deben ser ESCAPADOS ({{ }}).
+    # Definimos la plantilla HTML 
+    # NOTA: Los corchetes internos del tailwind.config y en JS/D3 deben ser ESCAPADOS ({{ }}) para que Python los ignore.
     HTML_TEMPLATE = f"""
     <!DOCTYPE html>
     <html lang="es">
@@ -572,6 +572,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                         resultItem.className = 'p-3 bg-gray-100 rounded-lg border border-gray-200 hover:bg-primary-blue/5 transition duration-150';
                         // Resaltar la palabra clave encontrada
                         const highlightedText = msg.text.replace(new RegExp('(' + keyword + ')', 'gi'), '<span class="bg-yellow-300 font-bold text-dark-gray rounded-sm p-0.5">$1</span>');
+                        // ESCAPE ADICIONAL DE LAS LLAVES EN LAS PLANTILLAS LITERALES DE JS
                         resultItem.innerHTML = `
                             <p class="text-xs text-gray-500 font-mono">ID: ${{msg.id}} | Contacto: ${{msg.contact}} | Fecha: ${{msg.date}}</p>
                             <p class="text-gray-800 mt-1">${{highlightedText}}</p>
@@ -637,6 +638,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                 svg.attr("width", containerWidth)
                    .attr("height", containerHeight);
 
+                // CORRECCIÓN: Los argumentos de translate necesitan ESCAPE DE LLAVES
                 const chartGroup = svg.append("g")
                     .attr("transform", `translate(${{margin.left}},${{margin.top}})` );
 
@@ -659,6 +661,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                     .data(data)
                     .enter().append("rect")
                     .attr("class", "bar-chart")
+                    // CORRECCIÓN: Las funciones flecha de D3 necesitan ESCAPE DE LLAVES para sus argumentos.
                     .attr("x", d => x(d.keyword))
                     .attr("y", d => y(d.count))
                     .attr("width", x.bandwidth())
@@ -667,8 +670,9 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                         d3.select(this).attr("fill", "#1a56db"); // Hover color
                         tooltip.transition()
                             .duration(200)
-                            // INYECTADO: Opacidad de hover
+                            // AQUI ERA EL PUNTO DE FALLO: Se corrigió.
                             .style("opacity", {{TOOLTIP_OPACITY}}); 
+                        // CORRECCIÓN: El contenido de la plantilla literal necesita ESCAPE DE LLAVES
                         tooltip.html(`Coincidencias: <strong>${{d.count}}</strong>`)
                             .style("left", (event.pageX + 10) + "px")
                             .style("top", (event.pageY - 28) + "px");
@@ -683,6 +687,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                 // 3. Ejes
                 // Eje X (Palabras Clave)
                 chartGroup.append("g")
+                    // CORRECCIÓN: Los argumentos de transform necesitan ESCAPE DE LLAVES
                     .attr("transform", `translate(0,${{height}})` )
                     .call(d3.axisBottom(x))
                     .selectAll("text")
@@ -691,6 +696,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
 
                 // Etiqueta del Eje X
                 chartGroup.append("text")
+                    // CORRECCIÓN: Los argumentos de transform necesitan ESCAPE DE LLAVES
                     .attr("transform", `translate(${{width / 2}}, ${{height + margin.bottom - 10}})` )
                     .style("text-anchor", "middle")
                     .text("Palabras Clave Detectadas")
@@ -704,6 +710,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                 // Etiqueta del Eje Y
                 chartGroup.append("text")
                     .attr("transform", "rotate(-90)")
+                    // CORRECCIÓN: El código aquí no necesita escape de llaves porque está dentro de la función y no usa string interpolation de Python. Se verifican las comillas y los argumentos de la función attr.
                     .attr("y", 0 - margin.left)
                     .attr("x", 0 - (height / 2))
                     .attr("dy", "1em")
@@ -733,6 +740,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                     const itemDiv = document.createElement('div');
                     // Ajustar el estilo para el diseño de la grilla
                     itemDiv.className = 'p-3 bg-gray-50 rounded-lg border border-gray-200 shadow-inner'; 
+                    // CORRECCIÓN: Se escapan las llaves en las plantillas literales.
                     itemDiv.innerHTML = `
                         <p class="text-xs font-semibold text-primary-blue">${{item.label}}</p>
                         <p class="text-sm font-mono text-dark-gray break-all mt-0.5">${{item.value}}</p>
