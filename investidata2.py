@@ -238,7 +238,7 @@ def view_dashboard(xls, mapping):
                             if st.button(f"Ver todos ({category})", key=category):
                                 # Almacenar la hoja y la máscara de filtro en el estado
                                 st.session_state['filter_pass'] = (mapping.get("messages"), mask, category)
-                                st.experimental_rerun()
+                                st.rerun() # <-- CORRECCIÓN: Usar st.rerun()
                 
                 if not found_alerts:
                     st.success("✔ Escaneo inicial limpio: No se detectaron palabras clave de alto riesgo.")
@@ -588,7 +588,7 @@ if st.session_state['xls_file']:
         # Botón para limpiar el estado y volver a la navegación normal
         if st.button("⬅️ Volver al Dashboard"):
             st.session_state['filter_pass'] = None
-            st.experimental_rerun()
+            st.rerun() # <-- CORRECCIÓN: Usar st.rerun()
             
     # 2. MANEJAR NAVEGACIÓN NORMAL
     elif selection == "Inicio":
@@ -674,7 +674,7 @@ else:
                     
                 # 3. Forzar la recarga para pasar al Dashboard
                 st.success("Archivo cargado y procesado. Recargando la interfaz...")
-                st.experimental_rerun()
+                st.rerun() # <-- CORRECCIÓN: Usar st.rerun()
             except Exception as e:
                 st.error(f"Error al procesar el archivo Excel. Por favor, verifique el formato. Error: {e}")
                 # Limpiar estado si falla el procesamiento
