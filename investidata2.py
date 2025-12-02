@@ -63,6 +63,13 @@ st.markdown("""
         border: 1px solid #e0e0e0;
         border-radius: 5px;
     }
+    .welcome-container {
+        padding: 40px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, #e6f3ff, #ffffff);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        text-align: center;
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -256,15 +263,6 @@ def view_messages(xls, sheet_name):
     if "from" in cols_map and "to" in cols_map:
         
         # 1. Intentar identificar el "dispositivo local" como el valor más frecuente en 'from' (enviados)
-        # Esto asume que el reporte es de 1 dispositivo. Si hay 'direction', usar esa.
-        
-        # Combinar las columnas 'from' y 'to' para obtener todos los interlocutores (excepto NaN)
-        all_parties = pd.concat([df[cols_map["from"]].astype(str), df[cols_map["to"]].astype(str)]).unique()
-        
-        # Heurística simple: el contacto del dispositivo es el que aparece más veces como origen o destino
-        # Excluir valores comunes como 'nan', 'null', o el número del propio dispositivo (si es constante y aparece mucho)
-        
-        # Paso 1: Intentar identificar el ID del Dispositivo
         potential_device_ids = df[cols_map["from"]].value_counts()
         device_id = None
         if not potential_device_ids.empty:
@@ -515,8 +513,10 @@ def view_raw_explorer(xls, mapping):
 # ================================
 
 with st.sidebar:
-    st.markdown("# 🔍 InvestiData")
-    st.markdown("**Herramienta Forense v2.0**")
+    # --- LOGO ---
+    # Usamos un placeholder con un diseño profesional que se ajusta al tema forense/datos
+    st.image("https://placehold.co/400x100/1a73e8/ffffff?text=InvestiData+ID", use_column_width=True)
+    st.markdown("**Plataforma Forense v2.0**")
     st.markdown("---")
     
     uploaded_file = st.file_uploader("📂 Cargar UFED (.xlsx)", type=["xlsx"])
@@ -647,3 +647,28 @@ if uploaded_file and xls:
 
     elif selection == "Raw":
         view_raw_explorer(xls, sheet_mapping)
+        
+else:
+    # --- PANTALLA DE BIENVENIDA (LANDING PAGE) ---
+    st.markdown(
+        f"""
+        <div class="welcome-container">
+            <h1 style="color: #1a73e8; font-size: 3rem;">InvestiData <span style="font-size: 1.5rem;">v2.0</span></h1>
+            <p style="font-size: 1.5rem; color: #333; margin-bottom: 30px;">
+                La plataforma inteligente para el análisis automatizado de extracciones forenses móviles.
+            </p>
+            <hr style="border-top: 2px solid #ddd; margin: 30px 0;">
+            <h3 style="color: #1a73e8;">⚙️ Instrucciones de Inicio</h3>
+            <div style="text-align: left; max-width: 600px; margin: 0 auto;">
+                <ol style="font-size: 1.1rem; line-height: 1.8;">
+                    <li>**Prepare el Reporte:** Obtenga un reporte de extracción forense (ej: UFED, Cellebrite) en formato **.xlsx**.</li>
+                    <li>**Utilice el Cargador:** Vaya a la barra lateral izquierda y use el botón: 
+                        <span style="font-weight: bold; color: #008000;">📂 Cargar UFED (.xlsx)</span>.
+                    </li>
+                    <li>**Comience a Analizar:** Una vez cargado, el sistema procesará los datos, identificará las hojas y lo dirigirá automáticamente al **Dashboard General**.</li>
+                </ol>
+            </div>
+        </div>
+        """, 
+        unsafe_allow_html=True
+    )
