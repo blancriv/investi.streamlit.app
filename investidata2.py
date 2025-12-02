@@ -21,7 +21,7 @@ TOOLTIP_OPACITY_VAL = "0.9"
 
 
 # -----------------------------------------------------------------------------
-# 2. CARGAR CONTENIDO HTML CON PLACEHOLDERS
+# 2. CARGAR CONTENIDO HTML CON PLACEHOLDERS Y CORCHETES ESCAPADOS
 # -----------------------------------------------------------------------------
 HTML_TEMPLATE = """
 <!DOCTYPE html>
@@ -36,44 +36,45 @@ HTML_TEMPLATE = """
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <!-- Configuración y Estilos de Tailwind -->
     <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
+        // CORCHETES ESCAPADOS EN CONFIGURACIÓN TAILWIND
+        tailwind.config = {{
+            theme: {{
+                extend: {{
+                    colors: {{
                         'primary-blue': '#1a56db', 
                         'secondary-cyan': '#06b6d4', 
                         'accent-red': '#f87171', 
                         'dark-gray': '#1f2937', 
-                    },
-                    fontFamily: {
+                    }},
+                    fontFamily: {{
                         sans: ['Inter', 'sans-serif'],
-                    },
-                }
-            }
-        }
+                    }},
+                }},
+            }},
+        }}
     </script>
     <style>
         /* Estilos personalizados para el dashboard */
-        .card-shadow {
+        .card-shadow {{
             /* INYECTADO: Sombra con 0.1 y 0.06 */
             {DEFAULT_SHADOW}
             /* Marcadores de posición CSS */
             transition: transform {TRANSITION_SHORT}, box-shadow {TRANSITION_SHORT};
-        }
-        .card-shadow:hover {
+        }}
+        .card-shadow:hover {{
             transform: translateY(-3px);
             /* INYECTADO: Sombra de hover */
             {HOVER_SHADOW}
-        }
+        }}
         /* Estilo para el gráfico D3 */
-        .bar-chart rect {
+        .bar-chart rect {{
             fill: #06b6d4;
             transition: fill {TRANSITION_MEDIUM} ease;
-        }
-        .bar-chart rect:hover {
+        }}
+        .bar-chart rect:hover {{
             fill: #1a56db;
-        }
-        .tooltip {
+        }}
+        .tooltip {{
             position: absolute;
             text-align: center;
             padding: 8px;
@@ -85,7 +86,7 @@ HTML_TEMPLATE = """
             transition: opacity {TRANSITION_MEDIUM};
             font-size: {FONT_SIZE};
             z-index: 100;
-        }
+        }}
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen font-sans antialiased">
@@ -249,10 +250,10 @@ HTML_TEMPLATE = """
     <!-- Scripts de Firebase y Lógica de la Aplicación -->
     <script type="module">
         // Importaciones de Firebase (requeridas para persistencia/autenticación)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import {{ initializeApp }} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import {{ getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged }} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import {{ getFirestore, doc, setDoc, getDoc }} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import {{ setLogLevel }} from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // Establecer nivel de log para depuración de Firestore
         setLogLevel('error'); 
@@ -265,7 +266,7 @@ HTML_TEMPLATE = """
         let isAuthReady = false;
 
         // Configuración de Firebase (proporcionada por el entorno)
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{{}}');
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
@@ -273,43 +274,43 @@ HTML_TEMPLATE = """
         loadingMessage.classList.remove('hidden');
 
         // --- 1. Inicialización de Firebase y Autenticación ---
-        if (Object.keys(firebaseConfig).length > 0) {
+        if (Object.keys(firebaseConfig).length > 0) {{
             app = initializeApp(firebaseConfig);
             db = getFirestore(app);
             auth = getAuth(app);
 
             // Asegurar la autenticación antes de usar Firestore
-            onAuthStateChanged(auth, async (user) => {
-                if (!user) {
-                    try {
-                        if (initialAuthToken) {
+            onAuthStateChanged(auth, async (user) => {{
+                if (!user) {{
+                    try {{
+                        if (initialAuthToken) {{
                             await signInWithCustomToken(auth, initialAuthToken);
-                        } else {
+                        }} else {{
                             await signInAnonymously(auth);
-                        }
+                        }}
                         // La lógica se ejecutará nuevamente cuando onAuthStateChanged detecte el usuario
-                    } catch (error) {
+                    }} catch (error) {{
                         console.error("Error en la autenticación:", error);
                         document.getElementById('user-id').textContent = 'Error de Auth';
                         isAuthReady = true;
                         loadingMessage.classList.add('hidden');
-                    }
-                } else {
+                    }}
+                }} else {{
                     userId = user.uid;
                     document.getElementById('user-id').textContent = userId;
                     isAuthReady = true;
                     loadingMessage.classList.add('hidden');
                     // Una vez autenticado, cargar el estado o inicializar la app
                     loadAppState();
-                }
-            });
-        } else {
+                }}
+            }});
+        }} else {{
             console.error("Configuración de Firebase no disponible. La persistencia de datos estará deshabilitada.");
             userId = 'Anon-Simulated-' + Math.random().toString(36).substr(2, 9);
             document.getElementById('user-id').textContent = userId;
             isAuthReady = true;
             loadingMessage.classList.add('hidden');
-        }
+        }}
 
         // --- 2. Lógica de Navegación y Estado ---
         let currentView = 'dashboard'; // 'dashboard' o 'analysis'
@@ -327,24 +328,24 @@ HTML_TEMPLATE = """
         const resultCountSpan = document.getElementById('result-count');
         const noResultsMessage = document.getElementById('no-results-message');
 
-        function switchView(view) {
+        function switchView(view) {{
             currentView = view;
-            if (view === 'dashboard') {
+            if (view === 'dashboard') {{
                 dashboardView.classList.remove('hidden');
                 analysisView.classList.add('hidden');
-            } else {
+            }} else {{
                 dashboardView.classList.add('hidden');
                 analysisView.classList.remove('hidden');
-            }
+            }}
             saveAppState();
-        }
+        }}
 
-        window.navigateToAnalysis = function(topic) {
+        window.navigateToAnalysis = function(topic) {{
             currentFocusTopic = topic;
             let titleText = 'Análisis Profundo';
             
             // Simular el título según el tema
-            switch (topic) {
+            switch (topic) {{
                 case 'armas': titleText = 'Análisis Temático: Armas y Porte'; break;
                 case 'sexo': titleText = 'Análisis Temático: Delitos Sexuales'; break;
                 case 'matar': titleText = 'Análisis Temático: Homicidio y Amenazas'; break;
@@ -352,7 +353,7 @@ HTML_TEMPLATE = """
                 case 'contactos': titleText = 'Análisis de Redes y Contactos Clave'; break;
                 case 'ubicacion': titleText = 'Análisis Geográfico y Patrones de Movimiento'; break;
                 case 'archivos': titleText = 'Análisis de Contenido Multimedia'; break;
-            }
+            }}
 
             analysisTitle.textContent = titleText;
             currentTopicDisplay.textContent = titleText.split(': ')[1] || topic.charAt(0).toUpperCase() + topic.slice(1);
@@ -367,57 +368,57 @@ HTML_TEMPLATE = """
             searchResultsSection.classList.add('hidden');
             
             switchView('analysis');
-        }
+        }}
 
         // Navegación al Dashboard
-        document.getElementById('btn-dashboard').addEventListener('click', () => {
+        document.getElementById('btn-dashboard').addEventListener('click', () => {{
             switchView('dashboard');
-        });
+        }});
 
         // --- 3. Firebase: Persistencia del Estado ---
-        async function saveAppState() {
+        async function saveAppState() {{
             if (!isAuthReady || !db) return;
-            try {
-                const userSettingsRef = doc(db, `artifacts/${appId}/users/${userId}/investidata_settings`, 'dashboard_state');
-                await setDoc(userSettingsRef, {
+            try {{
+                const userSettingsRef = doc(db, `artifacts/${{appId}}/users/${{userId}}/investidata_settings`, 'dashboard_state');
+                await setDoc(userSettingsRef, {{
                     currentView: currentView,
                     currentFocusTopic: currentFocusTopic,
                     lastUpdated: new Date().toISOString()
-                }, { merge: true });
+                }}, {{ merge: true }});
                 // console.log("Estado de la aplicación guardado.");
-            } catch (e) {
+            }} catch (e) {{
                 console.error("Error al guardar el estado: ", e);
-            }
-        }
+            }}
+        }}
 
-        async function loadAppState() {
+        async function loadAppState() {{
             if (!isAuthReady || !db) return;
-            try {
-                const userSettingsRef = doc(db, `artifacts/${appId}/users/${userId}/investidata_settings`, 'dashboard_state');
+            try {{
+                const userSettingsRef = doc(db, `artifacts/${{appId}}/users/${{userId}}/investidata_settings`, 'dashboard_state');
                 const docSnap = await getDoc(userSettingsRef);
 
-                if (docSnap.exists()) {
+                if (docSnap.exists()) {{
                     const data = docSnap.data();
                     // Restaurar el último estado visitado
-                    if (data.currentView === 'analysis') {
+                    if (data.currentView === 'analysis') {{
                         navigateToAnalysis(data.currentFocusTopic || 'mensajes');
-                    } else {
+                    }} else {{
                         switchView('dashboard');
-                    }
+                    }}
                     // console.log("Estado de la aplicación cargado.");
-                } else {
+                }} else {{
                     switchView('dashboard');
-                }
-            } catch (e) {
+                }}
+            }} catch (e) {{
                 console.error("Error al cargar el estado: ", e);
                 switchView('dashboard'); // Fallback
-            }
-        }
+            }}
+        }}
 
         // --- 4. Datos Simulados y Funcionalidad de Búsqueda ---
         
         // Mock de Datos del Perfil del Dispositivo
-        const mockDeviceProfile = {
+        const mockDeviceProfile = {{
             imei: '358945001234567',
             marca: 'Samsung',
             modelo: 'Galaxy S21 (SM-G991U)',
@@ -426,68 +427,68 @@ HTML_TEMPLATE = """
             whatsapp_id: '+57 310 123 4567',
             facebook_profile: 'JuanRivera1985',
             instagram_id: 'riveraj_official'
-        };
+        }};
 
         // Mock de Datos Forenses (Mensajes)
         const mockMessages = [
-            { id: 1, contact: 'Juan P.', text: 'El paquete ya está listo. Trae el juguete nuevo (arma).', date: '2025-11-20' },
-            { id: 2, contact: 'María L.', text: 'Nos vemos a las 10pm en el lugar de siempre. Confirma el precio.', date: '2025-11-21' },
-            { id: 3, contact: 'Contacto X', text: 'Hay que anular el negocio si no traen el dinero pronto.', date: '2025-11-21' },
-            { id: 4, contact: 'Juan P.', text: 'Tengo las coordenadas del punto de encuentro. Es vital no fallar.', date: '2025-11-22' },
-            { id: 5, contact: 'El Jefe', text: 'Si se resiste, hay que neutralizarlo (matar). Sin testigos.', date: '2025-11-23' },
-            { id: 6, contact: 'María L.', text: 'Las fotos de la mercancía. ¿Necesitas algo más del sexo?', date: '2025-11-24' },
-            { id: 7, contact: 'Contacto X', text: 'Revisa las cuentas y el balance.', date: '2025-11-25' },
-            { id: 8, contact: 'Juan P.', text: 'La pistola está en el escondite. Asegúrate de llevarla.', date: '2025-11-26' },
-            { id: 9, contact: 'El Jefe', text: 'El objetivo debe ser eliminado antes del amanecer.', date: '2025-11-27' },
-            { id: 10, contact: 'María L.', text: 'Te envío los detalles para la reunión privada. Es un cliente importante.', date: '2025-11-28' },
+            {{ id: 1, contact: 'Juan P.', text: 'El paquete ya está listo. Trae el juguete nuevo (arma).', date: '2025-11-20' }},
+            {{ id: 2, contact: 'María L.', text: 'Nos vemos a las 10pm en el lugar de siempre. Confirma el precio.', date: '2025-11-21' }},
+            {{ id: 3, contact: 'Contacto X', text: 'Hay que anular el negocio si no traen el dinero pronto.', date: '2025-11-21' }},
+            {{ id: 4, contact: 'Juan P.', text: 'Tengo las coordenadas del punto de encuentro. Es vital no fallar.', date: '2025-11-22' }},
+            {{ id: 5, contact: 'El Jefe', text: 'Si se resiste, hay que neutralizarlo (matar). Sin testigos.', date: '2025-11-23' }},
+            {{ id: 6, contact: 'María L.', text: 'Las fotos de la mercancía. ¿Necesitas algo más del sexo?', date: '2025-11-24' }},
+            {{ id: 7, contact: 'Contacto X', text: 'Revisa las cuentas y el balance.', date: '2025-11-25' }},
+            {{ id: 8, contact: 'Juan P.', text: 'La pistola está en el escondite. Asegúrate de llevarla.', date: '2025-11-26' }},
+            {{ id: 9, contact: 'El Jefe', text: 'El objetivo debe ser eliminado antes del amanecer.', date: '2025-11-27' }},
+            {{ id: 10, contact: 'María L.', text: 'Te envío los detalles para la reunión privada. Es un cliente importante.', date: '2025-11-28' }},
         ];
 
         // Función para simular datos de gráfico por tema
-        function getMockChartData(topic) {
+        function getMockChartData(topic) {{
             let data = [];
-            switch (topic) {
+            switch (topic) {{
                 case 'armas':
                     data = [
-                        { keyword: 'pistola', count: 35 },
-                        { keyword: 'juguete', count: 18 },
-                        { keyword: 'fierro', count: 12 },
-                        { keyword: 'munición', count: 9 },
-                        { keyword: 'calibre', count: 5 },
+                        {{ keyword: 'pistola', count: 35 }},
+                        {{ keyword: 'juguete', count: 18 }},
+                        {{ keyword: 'fierro', count: 12 }},
+                        {{ keyword: 'munición', count: 9 }},
+                        {{ keyword: 'calibre', count: 5 }},
                     ];
                     break;
                 case 'sexo':
                     data = [
-                        { keyword: 'privada', count: 42 },
-                        { keyword: 'fotos', count: 31 },
-                        { keyword: 'cita', count: 19 },
-                        { keyword: 'cliente', count: 15 },
-                        { keyword: 'hotel', count: 10 },
+                        {{ keyword: 'privada', count: 42 }},
+                        {{ keyword: 'fotos', count: 31 }},
+                        {{ keyword: 'cita', count: 19 }},
+                        {{ keyword: 'cliente', count: 15 }},
+                        {{ keyword: 'hotel', count: 10 }},
                     ];
                     break;
                 case 'matar':
                     data = [
-                        { keyword: 'eliminar', count: 55 },
-                        { keyword: 'neutralizar', count: 40 },
-                        { keyword: 'anular', count: 28 },
-                        { keyword: 'deshacer', count: 15 },
-                        { keyword: 'silenciar', count: 10 },
+                        {{ keyword: 'eliminar', count: 55 }},
+                        {{ keyword: 'neutralizar', count: 40 }},
+                        {{ keyword: 'anular', count: 28 }},
+                        {{ keyword: 'deshacer', count: 15 }},
+                        {{ keyword: 'silenciar', count: 10 }},
                     ];
                     break;
                 default:
                     data = [
-                        { keyword: 'dinero', count: 50 },
-                        { keyword: 'encuentro', count: 40 },
-                        { keyword: 'dirección', count: 30 },
-                        { keyword: 'paquete', count: 20 },
-                        { keyword: 'coordenadas', count: 10 },
+                        {{ keyword: 'dinero', count: 50 }},
+                        {{ keyword: 'encuentro', count: 40 }},
+                        {{ keyword: 'dirección', count: 30 }},
+                        {{ keyword: 'paquete', count: 20 }},
+                        {{ keyword: 'coordenadas', count: 10 }},
                     ];
                     break;
-            }
+            }}
             return data;
-        }
+        }}
 
         // Lógica de Búsqueda
-        function handleSearch() {
+        function handleSearch() {{
             const keyword = keywordInput.value.trim().toLowerCase();
             if (!keyword) return;
 
@@ -502,68 +503,68 @@ HTML_TEMPLATE = """
             resultCountSpan.textContent = results.length;
             noResultsMessage.classList.add('hidden');
 
-            if (results.length === 0) {
+            if (results.length === 0) {{
                 noResultsMessage.classList.remove('hidden');
-            } else {
-                results.forEach(msg => {
+            }} else {{
+                results.forEach(msg => {{
                     const resultItem = document.createElement('div');
                     resultItem.className = 'p-3 bg-gray-100 rounded-lg border border-gray-200 hover:bg-primary-blue/5 transition duration-150';
                     // Resaltar la palabra clave encontrada
                     const highlightedText = msg.text.replace(new RegExp('(' + keyword + ')', 'gi'), '<span class="bg-yellow-300 font-bold text-dark-gray rounded-sm p-0.5">$1</span>');
                     resultItem.innerHTML = `
-                        <p class="text-xs text-gray-500 font-mono">ID: ${msg.id} | Contacto: ${msg.contact} | Fecha: ${msg.date}</p>
-                        <p class="text-gray-800 mt-1">${highlightedText}</p>
+                        <p class="text-xs text-gray-500 font-mono">ID: ${{msg.id}} | Contacto: ${{msg.contact}} | Fecha: ${{msg.date}}</p>
+                        <p class="text-gray-800 mt-1">${{highlightedText}}</p>
                     `;
                     resultsList.appendChild(resultItem);
-                });
-            }
-        }
+                }});
+            }}
+        }}
 
         searchButton.addEventListener('click', handleSearch);
-        keywordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
+        keywordInput.addEventListener('keypress', (e) => {{
+            if (e.key === 'Enter') {{
                 handleSearch();
-            }
-        });
+            }}
+        }});
 
         // --- 5. Sugerencias de Palabras Clave ---
 
         // Palabras clave fijas para sugerir
-        const fixedSuggestions = {
+        const fixedSuggestions = {{
             armas: ['pistola', 'calibre', 'fierro', 'munición', 'juguete'],
             sexo: ['privada', 'fotos', 'cita', 'hotel', 'cliente', 'sexo'],
             matar: ['eliminar', 'neutralizar', 'anular', 'testigos', 'silenciar'],
             general: ['dinero', 'encuentro', 'paquete', 'coordenadas', 'dirección']
-        };
+        }};
 
-        function renderKeywordSuggestions(topic) {
+        function renderKeywordSuggestions(topic) {{
             const container = document.getElementById('keyword-suggestions');
             container.innerHTML = '';
             
             const suggestions = fixedSuggestions[topic] || fixedSuggestions.general;
 
-            suggestions.forEach(keyword => {
+            suggestions.forEach(keyword => {{
                 const button = document.createElement('button');
                 button.textContent = keyword;
                 button.className = 'px-3 py-1 text-sm bg-gray-200 text-dark-gray rounded-full hover:bg-secondary-cyan hover:text-dark-gray transition duration-150 shadow-sm';
-                button.onclick = () => {
+                button.onclick = () => {{
                     keywordInput.value = keyword;
                     handleSearch();
-                };
+                }};
                 container.appendChild(button);
-            });
-        }
+            }});
+        }}
 
         // --- 6. Visualización con D3.js (Gráfico de Barras) ---
 
-        function renderBarChart(data) {
+        function renderBarChart(data) {{
             const container = d3.select("#chart-container");
             const svg = d3.select("#bar-chart");
             
             // Limpiar el SVG anterior
             svg.selectAll('*').remove();
 
-            const margin = { top: 20, right: 30, bottom: 50, left: 60 };
+            const margin = {{ top: 20, right: 30, bottom: 50, left: 60 }};
             
             // Hacer el gráfico responsivo
             const containerWidth = document.getElementById('chart-container').offsetWidth;
@@ -576,7 +577,7 @@ HTML_TEMPLATE = """
                .attr("height", containerHeight);
 
             const chartGroup = svg.append("g")
-                .attr("transform", `translate(${margin.left},${margin.top})`);
+                .attr("transform", `translate(${{margin.left}},${{margin.top}})` );
 
             // 1. Escalas
             const x = d3.scaleBand()
@@ -601,27 +602,27 @@ HTML_TEMPLATE = """
                 .attr("y", d => y(d.count))
                 .attr("width", x.bandwidth())
                 .attr("height", d => height - y(d.count))
-                .on("mouseover", function(event, d) {
+                .on("mouseover", function(event, d) {{
                     d3.select(this).attr("fill", "#1a56db"); // Hover color
                     tooltip.transition()
                         .duration(200)
-                        // INYECTADO: Opacidad de hover
-                        .style("opacity", "{TOOLTIP_OPACITY}"); 
-                    tooltip.html(`Coincidencias: <strong>${d.count}</strong>`)
+                        // INYECTADO: Opacidad de hover - AHORA CON EL PLACEHOLDER CORRECTO
+                        .style("opacity", {TOOLTIP_OPACITY}); 
+                    tooltip.html(`Coincidencias: <strong>${{d.count}}</strong>`)
                         .style("left", (event.pageX + 10) + "px")
                         .style("top", (event.pageY - 28) + "px");
-                })
-                .on("mouseout", function() {
+                }})
+                .on("mouseout", function() {{
                     d3.select(this).attr("fill", "#06b6d4"); // Restore color
                     tooltip.transition()
                         .duration(500)
                         .style("opacity", 0);
-                });
+                }});
 
             // 3. Ejes
             // Eje X (Palabras Clave)
             chartGroup.append("g")
-                .attr("transform", `translate(0,${height})`)
+                .attr("transform", `translate(0,${{height}})` )
                 .call(d3.axisBottom(x))
                 .selectAll("text")
                 .style("text-anchor", "middle")
@@ -629,7 +630,7 @@ HTML_TEMPLATE = """
 
             // Etiqueta del Eje X
             chartGroup.append("text")
-                .attr("transform", `translate(${width / 2}, ${height + margin.bottom - 10})`)
+                .attr("transform", `translate(${{width / 2}}, ${{height + margin.bottom - 10}})` )
                 .style("text-anchor", "middle")
                 .text("Palabras Clave Detectadas")
                 .attr("class", "text-sm font-semibold text-dark-gray");
@@ -648,59 +649,59 @@ HTML_TEMPLATE = """
                 .style("text-anchor", "middle")
                 .text("Frecuencia Absoluta")
                 .attr("class", "text-sm font-semibold text-dark-gray");
-        }
+        }}
         
         // --- 7. Renderizado del Perfil del Dispositivo ---
         
-        function renderDeviceProfile() {
+        function renderDeviceProfile() {{
             const container = document.getElementById('device-profile-data');
             container.innerHTML = ''; // Limpiar
 
             const data = [
-                { label: 'IMEI Principal', value: mockDeviceProfile.imei },
-                { label: 'Marca / Fabricante', value: mockDeviceProfile.marca },
-                { label: 'Modelo Exacto', value: mockDeviceProfile.modelo },
-                { label: 'Nombre de Usuario', value: mockDeviceProfile.usuario },
-                { label: 'Correo Asociado (Cuentas)', value: mockDeviceProfile.correo_asociado },
-                { label: 'ID de WhatsApp', value: mockDeviceProfile.whatsapp_id },
-                { label: 'Perfil de Facebook', value: mockDeviceProfile.facebook_profile },
-                { label: 'ID de Instagram', value: mockDeviceProfile.instagram_id }
+                {{ label: 'IMEI Principal', value: mockDeviceProfile.imei }},
+                {{ label: 'Marca / Fabricante', value: mockDeviceProfile.marca }},
+                {{ label: 'Modelo Exacto', value: mockDeviceProfile.modelo }},
+                {{ label: 'Nombre de Usuario', value: mockDeviceProfile.usuario }},
+                {{ label: 'Correo Asociado (Cuentas)', value: mockDeviceProfile.correo_asociado }},
+                {{ label: 'ID de WhatsApp', value: mockDeviceProfile.whatsapp_id }},
+                {{ label: 'Perfil de Facebook', value: mockDeviceProfile.facebook_profile }},
+                {{ label: 'ID de Instagram', value: mockDeviceProfile.instagram_id }}
             ];
 
-            data.forEach(item => {
+            data.forEach(item => {{
                 const itemDiv = document.createElement('div');
                 // Ajustar el estilo para el diseño de la grilla
                 itemDiv.className = 'p-3 bg-gray-50 rounded-lg border border-gray-200 shadow-inner'; 
                 itemDiv.innerHTML = `
-                    <p class="text-xs font-semibold text-primary-blue">${item.label}</p>
-                    <p class="text-sm font-mono text-dark-gray break-all mt-0.5">${item.value}</p>
+                    <p class="text-xs font-semibold text-primary-blue">${{item.label}}</p>
+                    <p class="text-sm font-mono text-dark-gray break-all mt-0.5">${{item.value}}</p>
                 `;
                 container.appendChild(itemDiv);
-            });
-        }
+            }});
+        }}
 
 
         // Inicialización de la vista
-        window.onload = function() {
+        window.onload = function() {{
             renderDeviceProfile(); // Llamar a la función al inicio
-            if (isAuthReady) {
+            if (isAuthReady) {{
                 loadAppState();
-            }
+            }}
             // Asegurarse de que el gráfico se renderice si se carga directamente en análisis
-            if (currentView === 'analysis') {
+            if (currentView === 'analysis') {{
                 renderBarChart(getMockChartData(currentFocusTopic));
-            } else {
+            }} else {{
                  // Mostrar el dashboard por defecto si no hay estado cargado
                  switchView('dashboard');
-            }
-        };
+            }}
+        }};
 
         // Escucha de resize para hacer el gráfico responsivo
-        window.addEventListener('resize', () => {
-             if (currentView === 'analysis') {
+        window.addEventListener('resize', () => {{
+             if (currentView === 'analysis') {{
                 renderBarChart(getMockChartData(currentFocusTopic));
-            }
-        });
+            }}
+        }});
 
     </script>
 </body>
@@ -709,8 +710,6 @@ HTML_TEMPLATE = """
 
 # --------------------------------------------------------------------------------
 # 3. Renderizado del HTML en Streamlit (Usa .format() para inyectar los valores)
-#    CORRECCIÓN CLAVE: Asegurar que los nombres de los argumentos en Python
-#    coincidan EXACTAMENTE con los placeholders en la plantilla HTML.
 # --------------------------------------------------------------------------------
 st.set_page_config(layout="wide")
 
