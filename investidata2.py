@@ -29,12 +29,14 @@
     <style>
         /* Estilos personalizados para el dashboard */
         .card-shadow {
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);
+            /* PLACEHOLDER: La sombra será inyectada por el script de Python para evitar el error decimal */
+            {DEFAULT_SHADOW}
             transition: transform 0.2s, box-shadow 0.2s;
         }
         .card-shadow:hover {
             transform: translateY(-3px);
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+            /* PLACEHOLDER: La sombra de hover será inyectada por el script de Python para evitar el error decimal */
+            {HOVER_SHADOW}
         }
         /* Estilo para el gráfico D3 */
         .bar-chart rect {
@@ -178,7 +180,7 @@
             </div>
 
             <!-- Sección de Visualizaciones -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 lg:col-span-2 gap-6">
                 <!-- Gráfico de Coincidencias -->
                 <div class="lg:col-span-2 bg-white p-6 rounded-xl shadow-xl border border-gray-200">
                     <h4 class="text-lg font-semibold text-dark-gray mb-4">Gráfico Estadístico de Coincidencias por Frecuencia</h4>
