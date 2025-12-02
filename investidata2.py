@@ -1,324 +1,211 @@
 import streamlit as st
 import pandas as pd
+import altair as alt
 import networkx as nx
 import matplotlib.pyplot as plt
 from collections import Counter
 import re
 
-# -----------------------------------------------------------
+# ================================
 # CONFIGURACIÓN GENERAL
-# -----------------------------------------------------------
+# ================================
 st.set_page_config(
-    page_title="InvestiData - Análisis Forense",
+    page_title="InvestiData – Análisis Forense Digital",
     layout="wide"
 )
 
-DEFAULT_FILE = "/mnt/data/202500019_2025-06-26_Informe.xlsx"
+# ================================
+# ESTILOS
+# ================================
+st.markdown("""
+<style>
 
-# -----------------------------------------------------------
+    .tarjeta {
+        border: 1px solid #d1d1d1;
+        border-radius: 12px;
+        padding: 15px;
+        background: #ffffff;
+        transition: 0.3s;
+    }
+
+    .tarjeta:hover {
+        transform: scale(1.02);
+        border-color: #1a73e8;
+        background: #f8fbff;
+    }
+
+    .titulo-tarjeta {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1a73e8;
+    }
+
+    .btn {
+        background-color:#1a73e8;
+        color:white;
+        padding:6px 12px;
+        border-radius:8px;
+        text-align:center;
+        text-decoration:none;
+        font-size:14px;
+    }
+
+</style>
+""", unsafe_allow_html=True)
+
+# ================================
 # TÍTULO
-# -----------------------------------------------------------
-st.title("📊 InvestiData – Analítica de Extracciones Forenses")
-st.write("Mapas, palabras clave, nombres propios, grafo de contactos y más.")
+# ================================
+st.title("🔍 InvestiData – Plataforma de Análisis Forense Digital")
+st.write("Cargue un archivo UFED XLSX para iniciar el análisis.")
 
-# -----------------------------------------------------------
+# ================================
 # SUBIR ARCHIVO
-# -----------------------------------------------------------
-uploaded_file = st.file_uploader("📂 Cargar archivo XLSX", type=["xlsx"])
-use_default = st.checkbox("Usar archivo integrado (si no subo archivo)", value=False)
+# ================================
+archivo = st.file_uploader("📂 Subir archivo forense (.xlsx)", type=["xlsx"])
 
-# -----------------------------------------------------------
-# PERFIL DEL DISPOSITIVO — LADO DERECHO
-# -----------------------------------------------------------
-col_left, col_right = st.columns([3, 1])
-
-with col_right:
-    st.markdown("### 🟦 Perfil del Dispositivo")
-    st.markdown(
-        """
-        <div style="font-size: 13px; line-height: 1.3; padding: 8px;
-                    border: 1px solid #2980b9; border-radius: 8px;">
-        📱 <b>Moto G24 – Motorola</b><br>
-        📧 <b>herreragus1976@gmail.com</b><br>
-        💬 <b>+57 311 252 8641 – “Calvin Klein”</b><br>
-        🔢 <b>IMEI:</b><br>
-        &nbsp;&nbsp;• 354102943867594<br>
-        &nbsp;&nbsp;• 354102943902490<br>
-        🎨 <b>Color:</b> Gris<br>
-        🧩 <b>SIM:</b> 1 encontrada<br>
-        🛠 <b>Estado:</b> Bueno<br>
-        </div>
-        """,
-        unsafe_allow_html=True
-    )
-
-# -----------------------------------------------------------
-# LEER ARCHIVO
-# -----------------------------------------------------------
-if uploaded_file:
-    try:
-        xls = pd.ExcelFile(uploaded_file)
-        st.success("✔ Archivo cargado correctamente.")
-    except:
-        st.error("❌ No se pudo leer el archivo subido.")
-        st.stop()
-
-elif use_default:
-    try:
-        xls = pd.ExcelFile(DEFAULT_FILE)
-        st.success(f"✔ Archivo por defecto cargado: {DEFAULT_FILE}")
-    except:
-        st.error("❌ No se pudo leer el archivo por defecto.")
-        st.stop()
-
-else:
-    st.info("Sube un archivo o activa 'Usar archivo integrado'.")
+if not archivo:
     st.stop()
 
-# -----------------------------------------------------------
-# SELECCIÓN DE HOJA
-# -----------------------------------------------------------
-hoja = st.selectbox("📑 Selecciona la hoja a analizar", xls.sheet_names)
-df = xls.parse(hoja)
+# ================================
+# CARGAR ARCHIVO
+# ================================
+try:
+    xls = pd.ExcelFile(archivo)
+    st.success("✔ Archivo cargado correctamente")
+except:
+    st.error("❌ No se pudo leer el archivo.")
+    st.stop()
 
-st.markdown("### 👀 Vista previa")
-st.dataframe(df.head())
 
-# Normalizar columnas
-df.columns = [c.strip() for c in df.columns]
-df.columns = [c.lower() for c in df.columns]
+# ================================
+# FUNCIÓN UNIVERSAL PARA MOSTRAR PANELES
+# ================================
+def analizar_hoja(df, titulo=""):
+    st.header(f"📌 {titulo}")
 
-# ============================================================
-#           🟦 TABLERO GENERAL – INVESTIDATA
-# ============================================================
-import altair as alt
+    st.subheader("📄 Vista previa")
+    st.dataframe(df.head(200))
 
-st.markdown("## 📊 Tablero General de Análisis")
+    texto = " ".join(df.astype(str).values.flatten())
 
-# Crear columnas para tarjetas tipo KPI
-kpi1, kpi2, kpi3, kpi4 = st.columns(4)
+    # -------------------------
+    # NÚMEROS
+    # -------------------------
+    numeros = re.findall(r"\b\d{7,15}\b", texto)
+    if numeros:
+        st.subheader("📞 Números más frecuentes")
+        st.dataframe(pd.DataFrame(Counter(numeros).most_common(10),
+                                  columns=["Número", "Frecuencia"]))
 
-# KPI 1 → Total registros
-kpi1.metric(
-    label="📁 Total de registros",
-    value=f"{len(df):,}"
-)
+    # -------------------------
+    # FECHAS
+    # -------------------------
+    fecha_col = next((c for c in df.columns if "fecha" in c.lower()), None)
+    if fecha_col:
+        try:
+            df[fecha_col] = pd.to_datetime(df[fecha_col], errors="coerce")
 
-# KPI 2 → Total números detectados
-all_text_tab = " ".join(df.astype(str).values.flatten())
-numbers_tab = re.findall(r"\b(?:\+?\d{7,15}|\d{7,15})\b", all_text_tab)
-kpi2.metric(
-    label="📞 Total números detectados",
-    value=len(numbers_tab)
-)
+            chart = alt.Chart(df.dropna(subset=[fecha_col])).mark_line().encode(
+                x=f"{fecha_col}:T",
+                y="count()",
+                tooltip=[fecha_col]
+            )
 
-# KPI 3 → Palabra más frecuente
-words = re.findall(r"\b[a-zA-ZáéíóúñÁÉÍÓÚÑ]{3,}\b", all_text_tab.lower())
-word_counts = Counter(words)
-top_word, freq_word = word_counts.most_common(1)[0]
-kpi3.metric(
-    label="🔠 Palabra más repetida",
-    value=top_word,
-    delta=f"{freq_word} veces"
-)
+            st.subheader("📈 Actividad por fechas")
+            st.altair_chart(chart, use_container_width=True)
+        except:
+            pass
 
-# KPI 4 → Fecha más activa
-if "fecha" in df.columns:
-    df["fecha"] = pd.to_datetime(df["fecha"], errors="coerce")
-    fecha_counts = df["fecha"].value_counts().sort_values(ascending=False)
-    if not fecha_counts.empty:
-        kpi4.metric(
-            label="📅 Fecha con más actividad",
-            value=str(fecha_counts.index[0].date()),
-            delta=f"{fecha_counts.iloc[0]} registros"
-        )
-else:
-    kpi4.metric("📅 Fecha activa", "No disponible")
+    # -------------------------
+    # MAPA
+    # -------------------------
+    lat = next((c for c in df.columns if "lat" in c.lower()), None)
+    lon = next((c for c in df.columns if "lon" in c.lower()), None)
 
-# ============================================================
-# GRÁFICOS ALTOS CALIDAD – AUTOMÁTICOS
-# ============================================================
+    if lat and lon:
+        try:
+            gps = df[[lat, lon]].dropna().astype(float)
+            gps.columns = ["lat", "lon"]
 
-st.markdown("### 📈 Actividad por fechas")
-if "fecha" in df.columns:
-    chart_fecha = alt.Chart(df.dropna(subset=["fecha"])).mark_line().encode(
-        x='fecha:T',
-        y='count()',
-        tooltip=['fecha:T', 'count()']
-    ).properties(
-        width='container',
-        height=250
-    )
-    st.altair_chart(chart_fecha, use_container_width=True)
-else:
-    st.info("No existen datos de fecha para graficar actividad temporal.")
+            st.subheader("📍 Mapa de ubicaciones")
+            st.map(gps)
+        except:
+            pass
 
-# ============================================================
 
-st.markdown("### 🔢 Números más mencionados")
-df_nums = pd.DataFrame(Counter(numbers_tab).most_common(15), columns=["Número", "Frecuencia"])
+# ================================
+# PERFIL DEL DISPOSITIVO
+# ================================
+st.header("📱 Perfil del Dispositivo")
 
-chart_nums = alt.Chart(df_nums).mark_bar().encode(
-    x='Número:N',
-    y='Frecuencia:Q',
-    tooltip=['Número', 'Frecuencia']
-).properties(
-    width='container',
-    height=250
-)
+hojas = {h.lower(): h for h in xls.sheet_names}
 
-st.altair_chart(chart_nums, use_container_width=True)
+# detectamos hoja resumen o dispositivo
+hoja_resumen = next((hojas[h] for h in hojas if "resumen" in h or "device" in h), None)
 
-# ============================================================
+if hoja_resumen:
+    df_resumen = xls.parse(hoja_resumen)
 
-st.markdown("### 🔡 Palabras más frecuentes")
-df_words = pd.DataFrame(word_counts.most_common(20), columns=["Palabra", "Frecuencia"])
-
-chart_words = alt.Chart(df_words).mark_bar().encode(
-    x='Palabra:N',
-    y='Frecuencia:Q',
-    tooltip=['Palabra', 'Frecuencia']
-).properties(
-    width='container',
-    height=250
-)
-
-st.altair_chart(chart_words, use_container_width=True)
-
-# -----------------------------------------------------------
-# FILTROS RÁPIDOS
-# -----------------------------------------------------------
-st.markdown("### 🎯 Filtros rápidos")
-c1, c2, c3, c4 = st.columns(4)
-
-with c1:
-    keyword = st.text_input("🔍 Palabra clave")
-
-with c2:
-    if "fecha" in df.columns:
-        df["fecha"] = pd.to_datetime(df["fecha"], errors="coerce")
-        min_f = df["fecha"].min()
-        max_f = df["fecha"].max()
-        fecha_inicio = st.date_input("📅 Desde", min_f)
-    else:
-        fecha_inicio = None
-
-with c3:
-    if "fecha" in df.columns:
-        fecha_fin = st.date_input("📅 Hasta", max_f)
-    else:
-        fecha_fin = None
-
-with c4:
-    contact_filter = st.text_input("👤 Contacto / Número")
-
-df_filtered = df.copy()
-
-if keyword:
-    df_filtered = df_filtered[df_filtered.astype(str).apply(
-        lambda row: row.str.contains(keyword, case=False).any(), axis=1)]
-
-if "fecha" in df_filtered.columns and fecha_inicio and fecha_fin:
-    df_filtered = df_filtered[
-        (df_filtered["fecha"] >= pd.to_datetime(fecha_inicio)) &
-        (df_filtered["fecha"] <= pd.to_datetime(fecha_fin))
-    ]
-
-if contact_filter:
-    df_filtered = df_filtered[df_filtered.astype(str).apply(
-        lambda row: row.str.contains(contact_filter, case=False).any(), axis=1)]
-
-st.markdown("### 📋 Resultados filtrados (primeros 200 registros)")
-st.dataframe(df_filtered.head(200))
-
-# -----------------------------------------------------------
-# DETECCIÓN DE NOMBRES PROPIOS
-# -----------------------------------------------------------
-st.markdown("### 🧾 Nombres propios detectados")
-text_columns = [c for c in df_filtered.columns if df_filtered[c].dtype == object]
-combined_text = " ".join(df_filtered[text_columns].astype(str).values.flatten())
-
-tokens = re.findall(r"\b[A-ZÁÉÍÓÚÑ][a-záéíóúñ]{2,}\b", combined_text)
-top_names = Counter(tokens).most_common(20)
-
-st.write(pd.DataFrame(top_names, columns=["Nombre", "Frecuencia"]))
-
-# -----------------------------------------------------------
-# PALABRAS SOSPECHOSAS
-# -----------------------------------------------------------
-st.markdown("### 🚨 Detección de patrones sospechosos")
-keywords = [
-    "arma", "pistola", "revólver", "droga", "matar",
-    "niña", "extorsión", "vacuna", "pagar", "amenaza"
-]
-patron = "|".join(keywords)
-
-df_sos = df_filtered[df_filtered.astype(str).apply(
-    lambda row: row.str.contains(patron, case=False).any(), axis=1)]
-
-st.write(f"Registros sospechosos encontrados: {len(df_sos)}")
-st.dataframe(df_sos.head(200))
-
-# -----------------------------------------------------------
-# DETECCIÓN DE NÚMEROS FRECUENTES
-# -----------------------------------------------------------
-st.markdown("### 🔢 Números detectados más comunes")
-all_text = " ".join(df_filtered.astype(str).values.flatten())
-numbers = re.findall(r"\b(?:\+?\d{7,15}|\d{7,15})\b", all_text)
-num_counts = Counter(numbers).most_common(10)
-st.write(pd.DataFrame(num_counts, columns=["Número", "Frecuencia"]))
-
-# -----------------------------------------------------------
-# MAPA DE UBICACIONES
-# -----------------------------------------------------------
-st.markdown("### 🗺️ Mapa de ubicaciones")
-lat_cols = [c for c in df_filtered.columns if "lat" in c]
-lon_cols = [c for c in df_filtered.columns if "lon" in c or "long" in c]
-
-if lat_cols and lon_cols:
-    map_df = df_filtered[[lat_cols[0], lon_cols[0]]].dropna()
-    map_df.columns = ["lat", "lon"]
     try:
-        map_df["lat"] = map_df["lat"].astype(float)
-        map_df["lon"] = map_df["lon"].astype(float)
-        st.map(map_df)
+        marca = df_resumen.iloc[0]["Marca"]
+        modelo = df_resumen.iloc[0]["Modelo"]
+        color = df_resumen.iloc[0]["Color"]
+        correo = df_resumen.iloc[0]["Correo"]
+        imei1 = df_resumen.iloc[0]["IMEI1"]
+        imei2 = df_resumen.iloc[0]["IMEI2"]
     except:
-        st.info("Las coordenadas no están en formato numérico.")
+        st.warning("El formato del perfil no coincide con UFED estándar.")
+        st.dataframe(df_resumen.head())
+    else:
+        st.markdown(f"""
+        <div class="tarjeta">
+            <span class="titulo-tarjeta">📱 {marca} – {modelo}</span><br><br>
+            <b>Color:</b> {color}<br>
+            <b>Correo asociado:</b> {correo}<br><br>
+            <b>IMEI:</b><br>
+            • {imei1}<br>
+            • {imei2}<br>
+        </div>
+        """, unsafe_allow_html=True)
 else:
-    st.info("No se detectaron columnas de latitud/longitud.")
+    st.info("No se encontró hoja de perfil del dispositivo.")
 
-# -----------------------------------------------------------
-# GRAFO DE CONTACTOS
-# -----------------------------------------------------------
-st.markdown("### 🔗 Grafo de contactos")
 
-sender_cols = [c for c in df_filtered.columns if "remit" in c]
-receiver_cols = [c for c in df_filtered.columns if "recept" in c or "receptor" in c]
+# ================================
+# DASHBOARD DE OPCIONES
+# ================================
+st.header("📊 Panel General de Análisis")
 
-if sender_cols and receiver_cols:
-    s = sender_cols[0]
-    r = receiver_cols[0]
-    edges = df_filtered[[s, r]].dropna().astype(str).values.tolist()
+col1, col2, col3 = st.columns(3)
 
-    G = nx.DiGraph()
-    G.add_edges_from(edges)
+def tarjeta(texto, hoja_nombre, icono):
+    if hoja_nombre in xls.sheet_names:
+        with st.container():
+            st.markdown(f"""
+            <div class="tarjeta">
+                <div class="titulo-tarjeta">{icono} {texto}</div>
+                <p style="font-size:14px;">Hoja detectada: <b>{hoja_nombre}</b></p>
+            """,
+            unsafe_allow_html=True)
 
-    fig, ax = plt.subplots(figsize=(7, 5))
-    pos = nx.spring_layout(G, k=0.5)
-    nx.draw(G, pos, node_size=20, alpha=0.6, ax=ax, with_labels=False)
-    ax.set_title("Grafo de contactos")
-    st.pyplot(fig)
-else:
-    st.info("No se detectaron columnas de remitente/receptor.")
+            if st.button(f"🔎 Ver análisis de {texto}", key=texto):
+                st.session_state["panel"] = hoja_nombre
 
-# -----------------------------------------------------------
-# DESCARGA CSV
-# -----------------------------------------------------------
-st.download_button(
-    "⬇️ Descargar CSV filtrado",
-    df_filtered.to_csv(index=False).encode("utf-8"),
-    "investidata_filtrado.csv",
-    mime="text/csv"
-)
+            st.markdown("</div>", unsafe_allow_html=True)
 
-st.success("Análisis completado ✔️")
+# -------- Tarjetas --------
+tarjeta("Mensajes y Conversaciones", next((h for h in xls.sheet_names if "convers" in h.lower() or "msg" in h.lower()), None), "💬")
+tarjeta("Contactos", next((h for h in xls.sheet_names if "contact" in h.lower()), None), "📇")
+tarjeta("Aplicaciones", next((h for h in xls.sheet_names if "aplic" in h.lower() or "app" in h.lower()), None), "📲")
+tarjeta("Ubicaciones GPS", next((h for h in xls.sheet_names if "ubic" in h.lower()), None), "📍")
+tarjeta("Llamadas", next((h for h in xls.sheet_names if "llama" in h.lower() or "call" in h.lower()), None), "📞")
+tarjeta("Historial Web", next((h for h in xls.sheet_names if "hist" in h.lower() or "internet" in h.lower()), None), "🌐")
+
+# ================================
+# PANEL DETALLADO
+# ================================
+if "panel" in st.session_state:
+    hoja_sel = st.session_state["panel"]
+    df_sel = xls.parse(hoja_sel)
+    analizar_hoja(df_sel, titulo=f"Análisis detallado de {hoja_sel}")
