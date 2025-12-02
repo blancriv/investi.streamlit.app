@@ -16,9 +16,18 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Inicializar st.session_state para la navegación con filtros
+# Inicializar st.session_state para la navegación y el archivo cargado
 if 'filter_pass' not in st.session_state:
     st.session_state['filter_pass'] = None
+if 'xls_file' not in st.session_state:
+    st.session_state['xls_file'] = None
+if 'sheet_mapping' not in st.session_state:
+    st.session_state['sheet_mapping'] = {}
+
+# Variables globales para el controlador principal
+xls = st.session_state['xls_file']
+sheet_mapping = st.session_state['sheet_mapping']
+selection = "Inicio" # Valor por defecto
 
 # ================================
 # ESTILOS CSS PERSONALIZADOS
@@ -69,6 +78,7 @@ st.markdown("""
         background: linear-gradient(135deg, #e6f3ff, #ffffff);
         box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         text-align: center;
+        margin-bottom: 20px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -87,7 +97,7 @@ KEYWORDS_ALERTS = {
 # FUNCIONES AUXILIARES
 # ================================
 
-@st.cache_resource # <--- CAMBIO CLAVE: Usamos cache_resource para objetos ExcelFile
+@st.cache_resource
 def load_excel(file):
     """Carga el archivo Excel en caché para optimizar rendimiento."""
     # Usar engine='openpyxl' es esencial para archivos XLSX modernos
@@ -139,6 +149,7 @@ def find_columns(df, candidates):
 
 # ================================
 # VISTAS DE ANÁLISIS (MÓDULOS)
+# (Las funciones de vista como view_dashboard, view_messages, etc., permanecen iguales)
 # ================================
 
 def view_dashboard(xls, mapping):
@@ -514,58 +525,37 @@ def view_raw_explorer(xls, mapping):
 
 with st.sidebar:
     # --- LOGO ---
-    # Usamos un placeholder con un diseño profesional que se ajusta al tema forense/datos
     st.image("https://placehold.co/400x100/1a73e8/ffffff?text=InvestiData+ID", use_column_width=True)
     st.markdown("**Plataforma Forense v2.0**")
     st.markdown("---")
     
-    uploaded_file = st.file_uploader("📂 Cargar UFED (.xlsx)", type=["xlsx"])
-    
-    st.markdown("---")
-    st.markdown("### Navegación")
-
-    selection = "Inicio"
-    sheet_mapping = {}
-    xls = None
-
-    if uploaded_file:
-        try:
-            xls = load_excel(uploaded_file)
-            sheet_mapping = normalize_sheet_names(xls.sheet_names)
+    # Comprobar si el archivo está cargado en la sesión
+    if st.session_state['xls_file']:
+        st.success("✅ Archivo de extracción cargado")
+        
+        # Opciones dinámicas según lo encontrado
+        nav_options = {"Inicio": "Dashboard"}
+        if sheet_mapping.get("messages"): nav_options["Mensajes"] = "Mensajes / Chats"
+        if sheet_mapping.get("calls"): nav_options["Llamadas"] = "Registro de Llamadas"
+        if sheet_mapping.get("contacts"): nav_options["Contactos"] = "Red de Contactos"
+        if sheet_mapping.get("locations"): nav_options["Ubicaciones"] = "Mapa GPS"
+        if sheet_mapping.get("web"): nav_options["Historial Web"] = "Historial Web"
+        if sheet_mapping.get("apps"): nav_options["Aplicaciones"] = "Apps Instaladas"
+        nav_options["Raw"] = "Explorador de Archivos"
             
-            # Opciones dinámicas según lo encontrado
-            nav_options = {"Inicio": "Dashboard"}
-            
-            if sheet_mapping.get("messages"): nav_options["Mensajes"] = "Mensajes / Chats"
-            if sheet_mapping.get("calls"): nav_options["Llamadas"] = "Registro de Llamadas"
-            if sheet_mapping.get("contacts"): nav_options["Contactos"] = "Red de Contactos"
-            if sheet_mapping.get("locations"): nav_options["Ubicaciones"] = "Mapa GPS"
-            if sheet_mapping.get("web"): nav_options["Historial Web"] = "Historial Web"
-            if sheet_mapping.get("apps"): nav_options["Aplicaciones"] = "Apps Instaladas"
-            
-            nav_options["Raw"] = "Explorador de Archivos"
-            
-            # Si hay un filtro activo, forzar a la vista de resultados filtrados
-            if st.session_state['filter_pass']:
-                selection = "Resultados Filtrados"
-            else:
-                selection = st.radio("Ir a:", list(nav_options.keys()), format_func=lambda x: nav_options[x])
-            
-            st.success("✅ Archivo cargado")
-        except Exception as e:
-            st.error(f"Error al procesar el archivo Excel. Por favor, verifique el formato. Error: {e}")
-            uploaded_file = None # Resetear la carga si hay un error
-            xls = None
+        # Si hay un filtro activo, forzar a la vista de resultados filtrados
+        if st.session_state['filter_pass']:
+            selection = "Resultados Filtrados"
+        else:
+            selection = st.radio("Ir a:", list(nav_options.keys()), format_func=lambda x: nav_options[x])
             
     else:
         st.info("Esperando archivo UFED...")
-        # Mensaje de bienvenida si no hay archivo
         st.markdown("---")
         st.markdown("""
         **Guía Rápida:**
-        1. Carga un archivo XLSX (reporte UFED/Cellebrite).
-        2. Navega por las secciones detectadas automáticamente.
-        3. Usa el **Dashboard** para las alertas rápidas y el resumen.
+        1. Cargue el archivo XLSX en el área principal.
+        2. El sistema lo guiará al **Dashboard** para las alertas.
         """)
 
 
@@ -576,7 +566,8 @@ with st.sidebar:
 # CONTROLADOR PRINCIPAL
 # ================================
 
-if uploaded_file and xls:
+if st.session_state['xls_file']:
+    # El archivo está cargado, ejecutar la lógica de análisis
     
     # 1. MANEJAR PASO DE FILTRO DESDE EL DASHBOARD (PRIORIDAD)
     if st.session_state['filter_pass']:
@@ -611,7 +602,6 @@ if uploaded_file and xls:
         
     elif selection == "Llamadas":
         if sheet_mapping.get("calls"):
-            # Reutilizamos la vista de mensajes (que maneja filtros generales y gráficos)
             st.markdown(f'<div class="main-header">📞 Registro de Llamadas</div>', unsafe_allow_html=True)
             view_messages(xls, sheet_mapping["calls"])
         else:
@@ -649,7 +639,9 @@ if uploaded_file and xls:
         view_raw_explorer(xls, sheet_mapping)
         
 else:
-    # --- PANTALLA DE BIENVENIDA (LANDING PAGE) ---
+    # --- PANTALLA DE BIENVENIDA (LANDING PAGE) Y UPLOADER EN EL CUERPO PRINCIPAL ---
+    
+    # Contenedor de Bienvenida
     st.markdown(
         f"""
         <div class="welcome-container">
@@ -657,18 +649,34 @@ else:
             <p style="font-size: 1.5rem; color: #333; margin-bottom: 30px;">
                 La plataforma inteligente para el análisis automatizado de extracciones forenses móviles.
             </p>
-            <hr style="border-top: 2px solid #ddd; margin: 30px 0;">
-            <h3 style="color: #1a73e8;">⚙️ Instrucciones de Inicio</h3>
-            <div style="text-align: left; max-width: 600px; margin: 0 auto;">
-                <ol style="font-size: 1.1rem; line-height: 1.8;">
-                    <li>**Prepare el Reporte:** Obtenga un reporte de extracción forense (ej: UFED, Cellebrite) en formato **.xlsx**.</li>
-                    <li>**Utilice el Cargador:** Vaya a la barra lateral izquierda y use el botón: 
-                        <span style="font-weight: bold; color: #008000;">📂 Cargar UFED (.xlsx)</span>.
-                    </li>
-                    <li>**Comience a Analizar:** Una vez cargado, el sistema procesará los datos, identificará las hojas y lo dirigirá automáticamente al **Dashboard General**.</li>
-                </ol>
-            </div>
+            <hr style="border-top: 2px solid #ddd; margin: 10px 0;">
         </div>
         """, 
         unsafe_allow_html=True
     )
+    
+    # Contenedor para el Uploader (en el cuerpo principal)
+    with st.container(border=True):
+        st.markdown('<h3 style="color: #1a73e8; text-align: center;">⬇️ Cargar Archivo de Extracción Forense</h3>', unsafe_allow_html=True)
+        uploaded_file = st.file_uploader("📂 Seleccione su reporte UFED/Cellebrite (.xlsx)", type=["xlsx"], label_visibility="collapsed")
+        
+        if uploaded_file:
+            try:
+                # 1. Procesamiento del archivo
+                with st.spinner('Procesando archivo... Esto puede tardar unos segundos.'):
+                    # Cargar y normalizar
+                    xls_loaded = load_excel(uploaded_file)
+                    mapping_loaded = normalize_sheet_names(xls_loaded.sheet_names)
+                    
+                    # 2. Almacenar el resultado en el estado de la sesión
+                    st.session_state['xls_file'] = xls_loaded
+                    st.session_state['sheet_mapping'] = mapping_loaded
+                    
+                # 3. Forzar la recarga para pasar al Dashboard
+                st.success("Archivo cargado y procesado. Recargando la interfaz...")
+                st.experimental_rerun()
+            except Exception as e:
+                st.error(f"Error al procesar el archivo Excel. Por favor, verifique el formato. Error: {e}")
+                # Limpiar estado si falla el procesamiento
+                if 'xls_file' in st.session_state: del st.session_state['xls_file']
+                if 'sheet_mapping' in st.session_state: del st.session_state['sheet_mapping']
