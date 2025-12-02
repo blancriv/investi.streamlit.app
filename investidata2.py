@@ -53,8 +53,6 @@ if uploaded_file is not None:
     st.sidebar.info("Simulando el procesamiento de 30+ hojas de datos...")
     
     # Simulación de los datos cargados para que el Dashboard tenga algo que mostrar
-    # En una aplicación real, aquí usaríamos pd.read_excel con sheet_name=None 
-    # y procesaríamos todas las hojas (mensajes, contactos, etc.)
     mock_data = {
         'IMEI Principal': '358945001234567',
         'Marca': 'Samsung',
@@ -84,7 +82,8 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     # Inyectamos el valor simulado del IMEI en el HTML
     imei_val = st.session_state.df_loaded['IMEI Principal']
     
-    # Definimos la plantilla HTML (igual que antes, pero con la inyección del IMEI)
+    # Definimos la plantilla HTML (igual que antes, pero con la inyección del IMEI y el escape de corchetes)
+    # NOTA IMPORTANTE: Los corchetes internos del tailwind.config y en JS/D3 deben ser ESCAPADOS ({{ }}).
     HTML_TEMPLATE = f"""
     <!DOCTYPE html>
     <html lang="es">
