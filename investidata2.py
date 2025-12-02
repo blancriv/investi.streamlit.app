@@ -170,8 +170,7 @@ if hoja_resumen:
         """, unsafe_allow_html=True)
 else:
     st.info("No se encontró hoja de perfil del dispositivo.")
-
-
+    
 # ================================
 # DASHBOARD DE OPCIONES
 # ================================
