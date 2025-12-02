@@ -29,14 +29,15 @@
     <style>
         /* Estilos personalizados para el dashboard */
         .card-shadow {
-            /* PLACEHOLDER: La sombra será inyectada por el script de Python para evitar el error decimal */
-            {DEFAULT_SHADOW}
-            transition: transform 0.2s, box-shadow 0.2s;
+            /* INYECTADO: Sombra normal (contiene 0.1, 0.06) */
+            {DEFAULT_SHADOW_CSS}
+            /* INYECTADO: Transición (contiene 0.2) - ESTA ERA LA LÍNEA PROBLEMÁTICA */
+            {TRANSITION_CSS} 
         }
         .card-shadow:hover {
             transform: translateY(-3px);
-            /* PLACEHOLDER: La sombra de hover será inyectada por el script de Python para evitar el error decimal */
-            {HOVER_SHADOW}
+            /* INYECTADO: Sombra de hover (contiene 0.1) */
+            {HOVER_SHADOW_CSS}
         }
         /* Estilo para el gráfico D3 */
         .bar-chart rect {
