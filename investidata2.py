@@ -1,3 +1,31 @@
+import streamlit as st
+import streamlit.components.v1 as components
+
+# -----------------------------------------------------------------------------
+# 1. DEFINICIÓN SEGURA DE VALORES CSS EN PYTHON (CRÍTICO)
+# Estos valores contienen decimales con el formato 0.X y DEBEN estar en cadenas
+# de una sola línea para evitar el error 'invalid decimal literal' en Python.
+# -----------------------------------------------------------------------------
+
+# Sombras (las líneas originales problemáticas)
+DEFAULT_SHADOW_CSS = "box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.06);"
+HOVER_SHADOW_CSS = "box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);"
+
+# Tiempos de Transición (0.2s y 0.3s)
+TRANSITION_TIME_SHORT = "0.2s"
+TRANSITION_TIME_MEDIUM = "0.3s"
+
+# Tamaño de Fuente Tooltip (0.875rem)
+FONT_SIZE_TOOLTIP = "0.875rem"
+
+# Opacidad (0.9)
+TOOLTIP_OPACITY = "0.9"
+
+
+# -----------------------------------------------------------------------------
+# 2. CARGAR CONTENIDO HTML CON PLACEHOLDERS
+# -----------------------------------------------------------------------------
+HTML_TEMPLATE = """
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -14,10 +42,10 @@
             theme: {
                 extend: {
                     colors: {
-                        'primary-blue': '#1a56db', // Un azul corporativo fuerte
-                        'secondary-cyan': '#06b6d4', // Cyan para acentos
-                        'accent-red': '#f87171', // Rojo suave para alertas
-                        'dark-gray': '#1f2937', // Gris oscuro para texto principal
+                        'primary-blue': '#1a56db', 
+                        'secondary-cyan': '#06b6d4', 
+                        'accent-red': '#f87171', 
+                        'dark-gray': '#1f2937', 
                     },
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
@@ -29,20 +57,19 @@
     <style>
         /* Estilos personalizados para el dashboard */
         .card-shadow {
-            /* INYECTADO: Sombra normal (contiene 0.1, 0.06) */
-            {DEFAULT_SHADOW_CSS}
-            /* INYECTADO: Transición (contiene 0.2) - ESTA ERA LA LÍNEA PROBLEMÁTICA */
-            {TRANSITION_CSS} 
+            /* INYECTADO: Sombra con 0.1 y 0.06 */
+            {DEFAULT_SHADOW}
+            transition: transform {TRANSITION_SHORT}, box-shadow {TRANSITION_SHORT};
         }
         .card-shadow:hover {
             transform: translateY(-3px);
-            /* INYECTADO: Sombra de hover (contiene 0.1) */
-            {HOVER_SHADOW_CSS}
+            /* INYECTADO: Sombra de hover */
+            {HOVER_SHADOW}
         }
         /* Estilo para el gráfico D3 */
         .bar-chart rect {
             fill: #06b6d4;
-            transition: fill 0.3s ease;
+            transition: fill {TRANSITION_MEDIUM} ease;
         }
         .bar-chart rect:hover {
             fill: #1a56db;
@@ -56,8 +83,8 @@
             border-radius: 6px;
             pointer-events: none;
             opacity: 0;
-            transition: opacity 0.3s;
-            font-size: 0.875rem;
+            transition: opacity {TRANSITION_MEDIUM};
+            font-size: {FONT_SIZE};
             z-index: 100;
         }
     </style>
@@ -579,7 +606,7 @@
                     d3.select(this).attr("fill", "#1a56db"); // Hover color
                     tooltip.transition()
                         .duration(200)
-                        .style("opacity", .9);
+                        .style("opacity", 0.9); // Usar el valor fijo aquí
                     tooltip.html(`Coincidencias: <strong>${d.count}</strong>`)
                         .style("left", (event.pageX + 10) + "px")
                         .style("top", (event.pageY - 28) + "px");
@@ -676,6 +703,27 @@
         });
 
     </script>
-
 </body>
 </html>
+"""
+
+# --------------------------------------------------------------------------------
+# 3. Renderizado del HTML en Streamlit (Usa .format() para inyectar los valores)
+# --------------------------------------------------------------------------------
+st.set_page_config(layout="wide")
+
+# Sustituimos TODOS los placeholders con las cadenas CSS definidas de forma segura.
+FINAL_HTML = HTML_TEMPLATE.format(
+    DEFAULT_SHADOW=DEFAULT_SHADOW_CSS,
+    HOVER_SHADOW=HOVER_SHADOW_CSS,
+    TRANSITION_SHORT=TRANSITION_TIME_SHORT,
+    TRANSITION_MEDIUM=TRANSITION_TIME_MEDIUM,
+    FONT_SIZE=FONT_SIZE_TOOLTIP,
+    TOOLTIP_OPACITY=TOOLTIP_OPACITY
+)
+
+components.html(
+    FINAL_HTML,
+    height=1200,
+    scrolling=True
+)
