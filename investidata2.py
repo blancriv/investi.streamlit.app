@@ -777,19 +777,23 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     </body>
     </html>
     """
-st.write("DEBUG TYPE:", type(st.session_state.get("df_loaded")))
-st.write("DEBUG VALUE:", st.session_state.get("df_loaded"))
+# --------------------------------------------------------------------
+# 🔵 ESTA PARTE ES LA QUE ESTABA MAL UBICADA → AHORA ESTÁ CORRECTA
+# --------------------------------------------------------------------
 
-imei_val = st.session_state["df_loaded"]["IMEI"]
-marca_val = st.session_state["df_loaded"]["Marca"]
-modelo_val = st.session_state["df_loaded"]["Modelo"]
-usuario_val = st.session_state["df_loaded"]["Usuario"]
+# SOLO ejecutar dashboard si df_loaded tiene datos reales
+if st.session_state["file_uploaded"] and st.session_state["df_loaded"]:
 
+    # Mostrar debug SOLO cuando ya existe la data
+    st.write("DEBUG TYPE:", type(st.session_state["df_loaded"]))
+    st.write("DEBUG VALUE:", st.session_state["df_loaded"])
 
+    imei_val = st.session_state["df_loaded"]["IMEI"]
+    marca_val = st.session_state["df_loaded"]["Marca"]
+    modelo_val = st.session_state["df_loaded"]["Modelo"]
+    usuario_val = st.session_state["df_loaded"]["Usuario"]
 
-    # Sustituimos TODOS los placeholders con las cadenas CSS/JS definidas de forma segura.
-if st.session_state["file_uploaded"]:
-
+    # Construcción del HTML_FINAL (NO LO MODIFIQUÉ)
     HTML_FINAL = (
         HTML_TEMPLATE
             .replace("{{IMEI_VAL}}", imei_val)
@@ -811,11 +815,10 @@ if st.session_state["file_uploaded"]:
     )
 
 
-
-
-    
+# --------------------------------------------------------------------
+# 🔴 SI NO HAY ARCHIVO CARGADO → MENSAJE DE BIENVENIDA
+# --------------------------------------------------------------------
 else:
-    # --- Mensaje de bienvenida/instrucción si no hay archivo cargado ---
     st.markdown("""
         <div class="p-8 bg-white rounded-xl shadow-xl border-l-4 border-secondary-cyan mt-10">
             <h3 class="text-3xl font-bold text-dark-gray mb-4">Bienvenido a InvestiData</h3>
