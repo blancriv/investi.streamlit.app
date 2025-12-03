@@ -780,14 +780,16 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     """
 
     # Sustituimos TODOS los placeholders con las cadenas CSS/JS definidas de forma segura.
-    HTML_FINAL = HTML_TEMPLATE.format(
-        DEFAULT_SHADOW=DEFAULT_SHADOW_CSS,
-        HOVER_SHADOW=HOVER_SHADOW_CSS,
-        TRANSITION_SHORT=TRANSITION_TIME_SHORT,
-        TRANSITION_MEDIUM=TRANSITION_TIME_MEDIUM,
-        FONT_SIZE=FONT_SIZE_TOOLTIP,
-        TOOLTIP_OPACITY=TOOLTIP_OPACITY_VAL
-    )
+HTML_FINAL = (
+    HTML_TEMPLATE
+        .replace("{DEFAULT_SHADOW}", DEFAULT_SHADOW_CSS)
+        .replace("{HOVER_SHADOW}", HOVER_SHADOW_CSS)
+        .replace("{TRANSITION_SHORT}", TRANSITION_TIME_SHORT)
+        .replace("{TRANSITION_MEDIUM}", TRANSITION_TIME_MEDIUM)
+        .replace("{FONT_SIZE}", FONT_SIZE_TOOLTIP)
+        .replace("{TOOLTIP_OPACITY}", TOOLTIP_OPACITY_VAL)
+)
+
 
     components.html(
         HTML_FINAL,
