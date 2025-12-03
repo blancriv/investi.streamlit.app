@@ -83,7 +83,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     imei_val = st.session_state.df_loaded['IMEI Principal']
     
     # Definimos la plantilla HTML 
-    # NOTA: Los corchetes internos del tailwind.config y en JS/D3 deben ser ESCAPADOS ({{ }}) para que Python los ignore.
+    # NOTA: Todos los corchetes internos de JS/D3/Tailwind config deben ser ESCAPADOS ({{ }})
     HTML_TEMPLATE = f"""
     <!DOCTYPE html>
     <html lang="es">
@@ -98,21 +98,21 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
         <!-- Configuración y Estilos de Tailwind -->
         <script>
             // CORCHETES ESCAPADOS EN CONFIGURACIÓN TAILWIND
-            tailwind.config = {{
-                theme: {{
-                    extend: {{
-                        colors: {{
+            tailwind.config = {{{{
+                theme: {{{{
+                    extend: {{{{
+                        colors: {{{{
                             'primary-blue': '#1a56db', 
                             'secondary-cyan': '#06b6d4', 
                             'accent-red': '#f87171', 
                             'dark-gray': '#1f2937', 
-                        }},
-                        fontFamily: {{
+                        }}}},
+                        fontFamily: {{{{
                             sans: ['Inter', 'sans-serif'],
-                        }},
-                    }},
-                }},
-            }}
+                        }}}},
+                    }}}},
+                }}}},
+            }}}}
         </script>
         <style>
             /* Estilos personalizados para el dashboard */
@@ -335,43 +335,43 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
             loadingMessage.classList.remove('hidden');
 
             // --- 1. Inicialización de Firebase y Autenticación ---
-            if (Object.keys(firebaseConfig).length > 0) {{
+            if (Object.keys(firebaseConfig).length > 0) {{{{ // ESCAPE DE LLAVES
                 app = initializeApp(firebaseConfig);
                 db = getFirestore(app);
                 auth = getAuth(app);
 
                 // Asegurar la autenticación antes de usar Firestore
-                onAuthStateChanged(auth, async (user) => {{
-                    if (!user) {{
-                        try {{
-                            if (initialAuthToken) {{
+                onAuthStateChanged(auth, async (user) => {{{{ // ESCAPE DE LLAVES
+                    if (!user) {{{{ // ESCAPE DE LLAVES
+                        try {{{{ // ESCAPE DE LLAVES
+                            if (initialAuthToken) {{{{ // ESCAPE DE LLAVES
                                 await signInWithCustomToken(auth, initialAuthToken);
-                            }} else {{
+                            }}}} else {{{{ // ESCAPE DE LLAVES
                                 await signInAnonymously(auth);
-                            }}
+                            }}}} // ESCAPE DE LLAVES
                             // La lógica se ejecutará nuevamente cuando onAuthStateChanged detecte el usuario
-                        }} catch (error) {{
+                        }}}} catch (error) {{{{ // ESCAPE DE LLAVES
                             console.error("Error en la autenticación:", error);
                             document.getElementById('user-id').textContent = 'Error de Auth';
                             isAuthReady = true;
                             loadingMessage.classList.add('hidden');
-                        }}
-                    }} else {{
+                        }}}} // ESCAPE DE LLAVES
+                    }}}} else {{{{ // ESCAPE DE LLAVES
                         userId = user.uid;
                         document.getElementById('user-id').textContent = userId;
                         isAuthReady = true;
                         loadingMessage.classList.add('hidden');
                         // Una vez autenticado, cargar el estado o inicializar la app
                         loadAppState();
-                    }}
-                }});
-            }} else {{
+                    }}}} // ESCAPE DE LLAVES
+                }}}}); // ESCAPE DE LLAVES
+            }}}} else {{{{ // ESCAPE DE LLAVES
                 console.error("Configuración de Firebase no disponible. La persistencia de datos estará deshabilitada.");
                 userId = 'Anon-Simulated-' + Math.random().toString(36).substr(2, 9);
                 document.getElementById('user-id').textContent = userId;
                 isAuthReady = true;
                 loadingMessage.classList.add('hidden');
-            }}
+            }}}} // ESCAPE DE LLAVES
 
             // --- 2. Lógica de Navegación y Estado ---
             let currentView = 'dashboard'; // 'dashboard' o 'analysis'
@@ -389,24 +389,24 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
             const resultCountSpan = document.getElementById('result-count');
             const noResultsMessage = document.getElementById('no-results-message');
 
-            function switchView(view) {{
+            function switchView(view) {{{{ // ESCAPE DE LLAVES
                 currentView = view;
-                if (view === 'dashboard') {{
+                if (view === 'dashboard') {{{{ // ESCAPE DE LLAVES
                     dashboardView.classList.remove('hidden');
                     analysisView.classList.add('hidden');
-                }} else {{
+                }}}} else {{{{ // ESCAPE DE LLAVES
                     dashboardView.classList.add('hidden');
                     analysisView.classList.remove('hidden');
-                }}
+                }}}} // ESCAPE DE LLAVES
                 saveAppState();
-            }}
+            }}}} // ESCAPE DE LLAVES
 
-            window.navigateToAnalysis = function(topic) {{
+            window.navigateToAnalysis = function(topic) {{{{ // ESCAPE DE LLAVES
                 currentFocusTopic = topic;
                 let titleText = 'Análisis Profundo';
                 
                 // Simular el título según el tema
-                switch (topic) {{
+                switch (topic) {{{{ // ESCAPE DE LLAVES
                     case 'armas': titleText = 'Análisis Temático: Armas y Porte'; break;
                     case 'sexo': titleText = 'Análisis Temático: Delitos Sexuales'; break;
                     case 'matar': titleText = 'Análisis Temático: Homicidio y Amenazas'; break;
@@ -414,7 +414,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                     case 'contactos': titleText = 'Análisis de Redes y Contactos Clave'; break;
                     case 'ubicacion': titleText = 'Análisis Geográfico y Patrones de Movimiento'; break;
                     case 'archivos': titleText = 'Análisis de Contenido Multimedia'; break;
-                }}
+                }}}} // ESCAPE DE LLAVES
 
                 analysisTitle.textContent = titleText;
                 currentTopicDisplay.textContent = titleText.split(': ')[1] || topic.charAt(0).toUpperCase() + topic.slice(1);
@@ -429,57 +429,59 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                 searchResultsSection.classList.add('hidden');
                 
                 switchView('analysis');
-            }}
+            }}}} // ESCAPE DE LLAVES
 
             // Navegación al Dashboard
-            document.getElementById('btn-dashboard').addEventListener('click', () => {{
+            document.getElementById('btn-dashboard').addEventListener('click', () => {{{{ // ESCAPE DE LLAVES
                 switchView('dashboard');
-            }});
+            }}}}); // ESCAPE DE LLAVES
 
             // --- 3. Firebase: Persistencia del Estado ---
-            async function saveAppState() {{
+            async function saveAppState() {{{{ // ESCAPE DE LLAVES
                 if (!isAuthReady || !db) return;
-                try {{
-                    const userSettingsRef = doc(db, `artifacts/${{appId}}/users/${{userId}}/investidata_settings`, 'dashboard_state');
-                    await setDoc(userSettingsRef, {{
+                try {{{{ // ESCAPE DE LLAVES
+                    // Corregido: Uso de plantilla literal de JS para las variables de Firebase
+                    const userSettingsRef = doc(db, `artifacts/\${{appId}}/users/\${{userId}}/investidata_settings`, 'dashboard_state');
+                    await setDoc(userSettingsRef, {{{{ // ESCAPE DE LLAVES
                         currentView: currentView,
                         currentFocusTopic: currentFocusTopic,
                         lastUpdated: new Date().toISOString()
-                    }}, {{ merge: true }});
+                    }}}}, {{{{ merge: true }}}} ); // ESCAPE DE LLAVES
                     // console.log("Estado de la aplicación guardado.");
-                }} catch (e) {{
+                }}}} catch (e) {{{{ // ESCAPE DE LLAVES
                     console.error("Error al guardar el estado: ", e);
-                }}
-            }}
+                }}}} // ESCAPE DE LLAVES
+            }}}} // ESCAPE DE LLAVES
 
-            async function loadAppState() {{
+            async function loadAppState() {{{{ // ESCAPE DE LLAVES
                 if (!isAuthReady || !db) return;
-                try {{
-                    const userSettingsRef = doc(db, `artifacts/${{appId}}/users/${{userId}}/investidata_settings`, 'dashboard_state');
+                try {{{{ // ESCAPE DE LLAVES
+                    // Corregido: Uso de plantilla literal de JS para las variables de Firebase
+                    const userSettingsRef = doc(db, `artifacts/\${{appId}}/users/\${{userId}}/investidata_settings`, 'dashboard_state');
                     const docSnap = await getDoc(userSettingsRef);
 
-                    if (docSnap.exists()) {{
+                    if (docSnap.exists()) {{{{ // ESCAPE DE LLAVES
                         const data = docSnap.data();
                         // Restaurar el último estado visitado
-                        if (data.currentView === 'analysis') {{
+                        if (data.currentView === 'analysis') {{{{ // ESCAPE DE LLAVES
                             navigateToAnalysis(data.currentFocusTopic || 'mensajes');
-                        }} else {{
+                        }}}} else {{{{ // ESCAPE DE LLAVES
                             switchView('dashboard');
-                        }}
+                        }}}} // ESCAPE DE LLAVES
                         // console.log("Estado de la aplicación cargado.");
-                    }} else {{
+                    }}}} else {{{{ // ESCAPE DE LLAVES
                         switchView('dashboard');
-                    }}
-                }} catch (e) {{
+                    }}}} // ESCAPE DE LLAVES
+                }}}} catch (e) {{{{ // ESCAPE DE LLAVES
                     console.error("Error al cargar el estado: ", e);
                     switchView('dashboard'); // Fallback
-                }}
-            }}
+                }}}} // ESCAPE DE LLAVES
+            }}}} // ESCAPE DE LLAVES
 
             // --- 4. Datos Simulados y Funcionalidad de Búsqueda ---
             
             // Mock de Datos del Perfil del Dispositivo
-            const mockDeviceProfile = {{
+            const mockDeviceProfile = {{{{ // ESCAPE DE LLAVES
                 imei: '{imei_val}', // Usamos la variable inyectada desde Python
                 marca: 'Samsung',
                 modelo: 'Galaxy S21 (SM-G991U)',
@@ -488,68 +490,68 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                 whatsapp_id: '+57 310 123 4567',
                 facebook_profile: 'JuanRivera1985',
                 instagram_id: 'riveraj_official'
-            }};
+            }}}} // ESCAPE DE LLAVES ;
 
             // Mock de Datos Forenses (Mensajes)
-            const mockMessages = [
-                {{ id: 1, contact: 'Juan P.', text: 'El paquete ya está listo. Trae el juguete nuevo (arma).', date: '2025-11-20' }},
-                {{ id: 2, contact: 'María L.', text: 'Nos vemos a las 10pm en el lugar de siempre. Confirma el precio.', date: '2025-11-21' }},
-                {{ id: 3, contact: 'Contacto X', text: 'Hay que anular el negocio si no traen el dinero pronto.', date: '2025-11-21' }},
-                {{ id: 4, contact: 'Juan P.', text: 'Tengo las coordenadas del punto de encuentro. Es vital no fallar.', date: '2025-11-22' }},
-                {{ id: 5, contact: 'El Jefe', text: 'Si se resiste, hay que neutralizarlo (matar). Sin testigos.', date: '2025-11-23' }},
-                {{ id: 6, contact: 'María L.', text: 'Las fotos de la mercancía. ¿Necesitas algo más del sexo?', date: '2025-11-24' }},
-                {{ id: 7, contact: 'Contacto X', text: 'Revisa las cuentas y el balance.', date: '2025-11-25' }},
-                {{ id: 8, contact: 'Juan P.', text: 'La pistola está en el escondite. Asegúrate de llevarla.', date: '2025-11-26' }},
-                {{ id: 9, contact: 'El Jefe', text: 'El objetivo debe ser eliminado antes del amanecer.', date: '2025-11-27' }},
-                {{ id: 10, contact: 'María L.', text: 'Te envío los detalles para la reunión privada. Es un cliente importante.', date: '2025-11-28' }},
-            ];
+            const mockMessages = [ // ESCAPE DE LLAVES
+                {{ id: 1, contact: 'Juan P.', text: 'El paquete ya está listo. Trae el juguete nuevo (arma).', date: '2025-11-20' }}, // ESCAPE DE LLAVES
+                {{ id: 2, contact: 'María L.', text: 'Nos vemos a las 10pm en el lugar de siempre. Confirma el precio.', date: '2025-11-21' }}, // ESCAPE DE LLAVES
+                {{ id: 3, contact: 'Contacto X', text: 'Hay que anular el negocio si no traen el dinero pronto.', date: '2025-11-21' }}, // ESCAPE DE LLAVES
+                {{ id: 4, contact: 'Juan P.', text: 'Tengo las coordenadas del punto de encuentro. Es vital no fallar.', date: '2025-11-22' }}, // ESCAPE DE LLAVES
+                {{ id: 5, contact: 'El Jefe', text: 'Si se resiste, hay que neutralizarlo (matar). Sin testigos.', date: '2025-11-23' }}, // ESCAPE DE LLAVES
+                {{ id: 6, contact: 'María L.', text: 'Las fotos de la mercancía. ¿Necesitas algo más del sexo?', date: '2025-11-24' }}, // ESCAPE DE LLAVES
+                {{ id: 7, contact: 'Contacto X', text: 'Revisa las cuentas y el balance.', date: '2025-11-25' }}, // ESCAPE DE LLAVES
+                {{ id: 8, contact: 'Juan P.', text: 'La pistola está en el escondite. Asegúrate de llevarla.', date: '2025-11-26' }}, // ESCAPE DE LLAVES
+                {{ id: 9, contact: 'El Jefe', text: 'El objetivo debe ser eliminado antes del amanecer.', date: '2025-11-27' }}, // ESCAPE DE LLAVES
+                {{ id: 10, contact: 'María L.', text: 'Te envío los detalles para la reunión privada. Es un cliente importante.', date: '2025-11-28' }}, // ESCAPE DE LLAVES
+            ]; // ESCAPE DE LLAVES
 
             // Función para simular datos de gráfico por tema
-            function getMockChartData(topic) {{
-                let data = [];
-                switch (topic) {{
+            function getMockChartData(topic) {{{{ // ESCAPE DE LLAVES
+                let data = []; // ESCAPE DE LLAVES
+                switch (topic) {{{{ // ESCAPE DE LLAVES
                     case 'armas':
-                        data = [
-                            {{ keyword: 'pistola', count: 35 }},
-                            {{ keyword: 'juguete', count: 18 }},
-                            {{ keyword: 'fierro', count: 12 }},
-                            {{ keyword: 'munición', count: 9 }},
-                            {{ keyword: 'calibre', count: 5 }},
-                        ];
+                        data = [ // ESCAPE DE LLAVES
+                            {{ keyword: 'pistola', count: 35 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'juguete', count: 18 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'fierro', count: 12 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'munición', count: 9 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'calibre', count: 5 }}, // ESCAPE DE LLAVES
+                        ]; // ESCAPE DE LLAVES
                         break;
                     case 'sexo':
-                        data = [
-                            {{ keyword: 'privada', count: 42 }},
-                            {{ keyword: 'fotos', count: 31 }},
-                            {{ keyword: 'cita', count: 19 }},
-                            {{ keyword: 'cliente', count: 15 }},
-                            {{ keyword: 'hotel', count: 10 }},
-                        ];
+                        data = [ // ESCAPE DE LLAVES
+                            {{ keyword: 'privada', count: 42 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'fotos', count: 31 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'cita', count: 19 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'cliente', count: 15 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'hotel', count: 10 }}, // ESCAPE DE LLAVES
+                        ]; // ESCAPE DE LLAVES
                         break;
                     case 'matar':
-                        data = [
-                            {{ keyword: 'eliminar', count: 55 }},
-                            {{ keyword: 'neutralizar', count: 40 }},
-                            {{ keyword: 'anular', count: 28 }},
-                            {{ keyword: 'deshacer', count: 15 }},
-                            {{ keyword: 'silenciar', count: 10 }},
-                        ];
+                        data = [ // ESCAPE DE LLAVES
+                            {{ keyword: 'eliminar', count: 55 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'neutralizar', count: 40 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'anular', count: 28 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'deshacer', count: 15 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'silenciar', count: 10 }}, // ESCAPE DE LLAVES
+                        ]; // ESCAPE DE LLAVES
                         break;
                     default:
-                        data = [
-                            {{ keyword: 'dinero', count: 50 }},
-                            {{ keyword: 'encuentro', count: 40 }},
-                            {{ keyword: 'dirección', count: 30 }},
-                            {{ keyword: 'paquete', count: 20 }},
-                            {{ keyword: 'coordenadas', count: 10 }},
-                        ];
+                        data = [ // ESCAPE DE LLAVES
+                            {{ keyword: 'dinero', count: 50 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'encuentro', count: 40 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'dirección', count: 30 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'paquete', count: 20 }}, // ESCAPE DE LLAVES
+                            {{ keyword: 'coordenadas', count: 10 }}, // ESCAPE DE LLAVES
+                        ]; // ESCAPE DE LLAVES
                         break;
-                }}
+                }}}} // ESCAPE DE LLAVES
                 return data;
-            }}
+            }}}} // ESCAPE DE LLAVES
 
             // Lógica de Búsqueda
-            function handleSearch() {{
+            function handleSearch() {{{{ // ESCAPE DE LLAVES
                 const keyword = keywordInput.value.trim().toLowerCase();
                 if (!keyword) return;
 
@@ -564,69 +566,69 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                 resultCountSpan.textContent = results.length;
                 noResultsMessage.classList.add('hidden');
 
-                if (results.length === 0) {{
+                if (results.length === 0) {{{{ // ESCAPE DE LLAVES
                     noResultsMessage.classList.remove('hidden');
-                }} else {{
-                    results.forEach(msg => {{
+                }}}} else {{{{ // ESCAPE DE LLAVES
+                    results.forEach(msg => {{{{ // ESCAPE DE LLAVES
                         const resultItem = document.createElement('div');
                         resultItem.className = 'p-3 bg-gray-100 rounded-lg border border-gray-200 hover:bg-primary-blue/5 transition duration-150';
                         // Resaltar la palabra clave encontrada
-                        const highlightedText = msg.text.replace(new RegExp('(' + keyword + ')', 'gi'), '<span class="bg-yellow-300 font-bold text-dark-gray rounded-sm p-0.5">$1</span>');
-                        // ESCAPE ADICIONAL DE LAS LLAVES EN LAS PLANTILLAS LITERALES DE JS
+                        const highlightedText = msg.text.replace(new RegExp('(' + keyword + ')', 'gi'), '<span class="bg-yellow-300 font-bold text-dark-gray rounded-sm p-0.5">\$1</span>'); // ESCAPE DE LLAVES
+                        // ESCAPE DE LLAVES EN LAS PLANTILLAS LITERALES DE JS
                         resultItem.innerHTML = `
-                            <p class="text-xs text-gray-500 font-mono">ID: ${{msg.id}} | Contacto: ${{msg.contact}} | Fecha: ${{msg.date}}</p>
-                            <p class="text-gray-800 mt-1">${{highlightedText}}</p>
+                            <p class="text-xs text-gray-500 font-mono">ID: \${{msg.id}} | Contacto: \${{msg.contact}} | Fecha: \${{msg.date}}</p>
+                            <p class="text-gray-800 mt-1">\${{highlightedText}}</p>
                         `;
                         resultsList.appendChild(resultItem);
-                    }});
-                }}
-            }}
+                    }}}}); // ESCAPE DE LLAVES
+                }}}} // ESCAPE DE LLAVES
+            }}}} // ESCAPE DE LLAVES
 
             searchButton.addEventListener('click', handleSearch);
-            keywordInput.addEventListener('keypress', (e) => {{
-                if (e.key === 'Enter') {{
+            keywordInput.addEventListener('keypress', (e) => {{{{ // ESCAPE DE LLAVES
+                if (e.key === 'Enter') {{{{ // ESCAPE DE LLAVES
                     handleSearch();
-                }}
-            }});
+                }}}} // ESCAPE DE LLAVES
+            }}}}); // ESCAPE DE LLAVES
 
             // --- 5. Sugerencias de Palabras Clave ---
 
             // Palabras clave fijas para sugerir
-            const fixedSuggestions = {{
+            const fixedSuggestions = {{{{ // ESCAPE DE LLAVES
                 armas: ['pistola', 'calibre', 'fierro', 'munición', 'juguete'],
                 sexo: ['privada', 'fotos', 'cita', 'hotel', 'cliente', 'sexo'],
                 matar: ['eliminar', 'neutralizar', 'anular', 'testigos', 'silenciar'],
                 general: ['dinero', 'encuentro', 'paquete', 'coordenadas', 'dirección']
-            }};
+            }}}} // ESCAPE DE LLAVES;
 
-            function renderKeywordSuggestions(topic) {{
+            function renderKeywordSuggestions(topic) {{{{ // ESCAPE DE LLAVES
                 const container = document.getElementById('keyword-suggestions');
                 container.innerHTML = '';
                 
                 const suggestions = fixedSuggestions[topic] || fixedSuggestions.general;
 
-                suggestions.forEach(keyword => {{
+                suggestions.forEach(keyword => {{{{ // ESCAPE DE LLAVES
                     const button = document.createElement('button');
                     button.textContent = keyword;
                     button.className = 'px-3 py-1 text-sm bg-gray-200 text-dark-gray rounded-full hover:bg-secondary-cyan hover:text-dark-gray transition duration-150 shadow-sm';
-                    button.onclick = () => {{
+                    button.onclick = () => {{{{ // ESCAPE DE LLAVES
                         keywordInput.value = keyword;
                         handleSearch();
-                    }};
+                    }}}} // ESCAPE DE LLAVES;
                     container.appendChild(button);
-                }});
-            }}
+                }}}}); // ESCAPE DE LLAVES
+            }}}} // ESCAPE DE LLAVES
 
             // --- 6. Visualización con D3.js (Gráfico de Barras) ---
 
-            function renderBarChart(data) {{
+            function renderBarChart(data) {{{{ // ESCAPE DE LLAVES
                 const container = d3.select("#chart-container");
                 const svg = d3.select("#bar-chart");
                 
                 // Limpiar el SVG anterior
                 svg.selectAll('*').remove();
 
-                const margin = {{ top: 20, right: 30, bottom: 50, left: 60 }};
+                const margin = {{{{ top: 20, right: 30, bottom: 50, left: 60 }}}}; // ESCAPE DE LLAVES
                 
                 // Hacer el gráfico responsivo
                 const containerWidth = document.getElementById('chart-container').offsetWidth;
@@ -638,9 +640,9 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                 svg.attr("width", containerWidth)
                    .attr("height", containerHeight);
 
-                // CORRECCIÓN: Los argumentos de translate necesitan ESCAPE DE LLAVES
+                // CORRECCIÓN: Usar la plantilla literal de JS con doble escape para Python
                 const chartGroup = svg.append("g")
-                    .attr("transform", `translate(${{margin.left}},${{margin.top}})` );
+                    .attr("transform", `translate(\${{margin.left}},\${{margin.top}})` );
 
                 // 1. Escalas
                 const x = d3.scaleBand()
@@ -661,34 +663,34 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                     .data(data)
                     .enter().append("rect")
                     .attr("class", "bar-chart")
-                    // CORRECCIÓN: Las funciones flecha de D3 necesitan ESCAPE DE LLAVES para sus argumentos.
+                    // CORRECCIÓN: Los argumentos de D3 necesitan ser doblemente escapados (d => x(d.keyword))
                     .attr("x", d => x(d.keyword))
                     .attr("y", d => y(d.count))
                     .attr("width", x.bandwidth())
                     .attr("height", d => height - y(d.count))
-                    .on("mouseover", function(event, d) {{
+                    .on("mouseover", function(event, d) {{{{ // ESCAPE DE LLAVES
                         d3.select(this).attr("fill", "#1a56db"); // Hover color
                         tooltip.transition()
                             .duration(200)
-                            // AQUI ERA EL PUNTO DE FALLO: Se corrigió.
-                            .style("opacity", {{TOOLTIP_OPACITY}}); 
+                            // CORRECCIÓN CLAVE: Se pasa la variable como string simple para evitar conflictos de doble llave.
+                            .style("opacity", '{{TOOLTIP_OPACITY}}'); 
                         // CORRECCIÓN: El contenido de la plantilla literal necesita ESCAPE DE LLAVES
-                        tooltip.html(`Coincidencias: <strong>${{d.count}}</strong>`)
+                        tooltip.html(`Coincidencias: <strong>\${{d.count}}</strong>`)
                             .style("left", (event.pageX + 10) + "px")
                             .style("top", (event.pageY - 28) + "px");
-                    }})
-                    .on("mouseout", function() {{
+                    }}}} ) // ESCAPE DE LLAVES
+                    .on("mouseout", function() {{{{ // ESCAPE DE LLAVES
                         d3.select(this).attr("fill", "#06b6d4"); // Restore color
                         tooltip.transition()
                             .duration(500)
                             .style("opacity", 0);
-                    }});
+                    }}}}); // ESCAPE DE LLAVES
 
                 // 3. Ejes
                 // Eje X (Palabras Clave)
                 chartGroup.append("g")
-                    // CORRECCIÓN: Los argumentos de transform necesitan ESCAPE DE LLAVES
-                    .attr("transform", `translate(0,${{height}})` )
+                    // CORRECCIÓN: Usar la plantilla literal de JS con doble escape para Python
+                    .attr("transform", `translate(0,\${{height}})` )
                     .call(d3.axisBottom(x))
                     .selectAll("text")
                     .style("text-anchor", "middle")
@@ -696,8 +698,8 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
 
                 // Etiqueta del Eje X
                 chartGroup.append("text")
-                    // CORRECCIÓN: Los argumentos de transform necesitan ESCAPE DE LLAVES
-                    .attr("transform", `translate(${{width / 2}}, ${{height + margin.bottom - 10}})` )
+                    // CORRECCIÓN: Usar la plantilla literal de JS con doble escape para Python
+                    .attr("transform", `translate(\${{width / 2}}, \${{height + margin.bottom - 10}})` )
                     .style("text-anchor", "middle")
                     .text("Palabras Clave Detectadas")
                     .attr("class", "text-sm font-semibold text-dark-gray");
@@ -710,67 +712,67 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                 // Etiqueta del Eje Y
                 chartGroup.append("text")
                     .attr("transform", "rotate(-90)")
-                    // CORRECCIÓN: El código aquí no necesita escape de llaves porque está dentro de la función y no usa string interpolation de Python. Se verifican las comillas y los argumentos de la función attr.
                     .attr("y", 0 - margin.left)
-                    .attr("x", 0 - (height / 2))
+                    // CORRECCIÓN: Usar la plantilla literal de JS con doble escape para Python
+                    .attr("x", 0 - (\${{height}} / 2))
                     .attr("dy", "1em")
                     .style("text-anchor", "middle")
                     .text("Frecuencia Absoluta")
                     .attr("class", "text-sm font-semibold text-dark-gray");
-            }}
+            }}}} // ESCAPE DE LLAVES
             
             // --- 7. Renderizado del Perfil del Dispositivo ---
             
-            function renderDeviceProfile() {{
+            function renderDeviceProfile() {{{{ // ESCAPE DE LLAVES
                 const container = document.getElementById('device-profile-data');
                 container.innerHTML = ''; // Limpiar
 
-                const data = [
-                    {{ label: 'IMEI Principal', value: mockDeviceProfile.imei }},
-                    {{ label: 'Marca / Fabricante', value: mockDeviceProfile.marca }},
-                    {{ label: 'Modelo Exacto', value: mockDeviceProfile.modelo }},
-                    {{ label: 'Nombre de Usuario', value: mockDeviceProfile.usuario }},
-                    {{ label: 'Correo Asociado (Cuentas)', value: mockDeviceProfile.correo_asociado }},
-                    {{ label: 'ID de WhatsApp', value: mockDeviceProfile.whatsapp_id }},
-                    {{ label: 'Perfil de Facebook', value: mockDeviceProfile.facebook_profile }},
-                    {{ label: 'ID de Instagram', value: mockDeviceProfile.instagram_id }}
-                ];
+                const data = [ // ESCAPE DE LLAVES
+                    {{ label: 'IMEI Principal', value: mockDeviceProfile.imei }}, // ESCAPE DE LLAVES
+                    {{ label: 'Marca / Fabricante', value: mockDeviceProfile.marca }}, // ESCAPE DE LLAVES
+                    {{ label: 'Modelo Exacto', value: mockDeviceProfile.modelo }}, // ESCAPE DE LLAVES
+                    {{ label: 'Nombre de Usuario', value: mockDeviceProfile.usuario }}, // ESCAPE DE LLAVES
+                    {{ label: 'Correo Asociado (Cuentas)', value: mockDeviceProfile.correo_asociado }}, // ESCAPE DE LLAVES
+                    {{ label: 'ID de WhatsApp', value: mockDeviceProfile.whatsapp_id }}, // ESCAPE DE LLAVES
+                    {{ label: 'Perfil de Facebook', value: mockDeviceProfile.facebook_profile }}, // ESCAPE DE LLAVES
+                    {{ label: 'ID de Instagram', value: mockDeviceProfile.instagram_id }} // ESCAPE DE LLAVES
+                ]; // ESCAPE DE LLAVES
 
-                data.forEach(item => {{
+                data.forEach(item => {{{{ // ESCAPE DE LLAVES
                     const itemDiv = document.createElement('div');
                     // Ajustar el estilo para el diseño de la grilla
                     itemDiv.className = 'p-3 bg-gray-50 rounded-lg border border-gray-200 shadow-inner'; 
                     // CORRECCIÓN: Se escapan las llaves en las plantillas literales.
                     itemDiv.innerHTML = `
-                        <p class="text-xs font-semibold text-primary-blue">${{item.label}}</p>
-                        <p class="text-sm font-mono text-dark-gray break-all mt-0.5">${{item.value}}</p>
+                        <p class="text-xs font-semibold text-primary-blue">\${{item.label}}</p>
+                        <p class="text-sm font-mono text-dark-gray break-all mt-0.5">\${{item.value}}</p>
                     `;
                     container.appendChild(itemDiv);
-                }});
-            }}
+                }}}}); // ESCAPE DE LLAVES
+            }}}} // ESCAPE DE LLAVES
 
 
             // Inicialización de la vista
-            window.onload = function() {{
+            window.onload = function() {{{{ // ESCAPE DE LLAVES
                 renderDeviceProfile(); // Llamar a la función al inicio
-                if (isAuthReady) {{
+                if (isAuthReady) {{{{ // ESCAPE DE LLAVES
                     loadAppState();
-                }}
+                }}}} // ESCAPE DE LLAVES
                 // Asegurarse de que el gráfico se renderice si se carga directamente en análisis
-                if (currentView === 'analysis') {{
+                if (currentView === 'analysis') {{{{ // ESCAPE DE LLAVES
                     renderBarChart(getMockChartData(currentFocusTopic));
-                }} else {{
+                }}}} else {{{{ // ESCAPE DE LLAVES
                      // Mostrar el dashboard por defecto si no hay estado cargado
                      switchView('dashboard');
-                }}
-            }};
+                }}}} // ESCAPE DE LLAVES
+            }}}} // ESCAPE DE LLAVES;
 
             // Escucha de resize para hacer el gráfico responsivo
-            window.addEventListener('resize', () => {{
-                 if (currentView === 'analysis') {{
+            window.addEventListener('resize', () => {{{{ // ESCAPE DE LLAVES
+                 if (currentView === 'analysis') {{{{ // ESCAPE DE LLAVES
                     renderBarChart(getMockChartData(currentFocusTopic));
-                }}
-            }});
+                }}}} // ESCAPE DE LLAVES
+            }}}}); // ESCAPE DE LLAVES
 
         </script>
     </body>
