@@ -782,10 +782,11 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
 st.write("DEBUG TYPE:", type(st.session_state.get("df_loaded")))
 st.write("DEBUG VALUE:", st.session_state.get("df_loaded"))
 
-imei_val = str(st.session_state["df_loaded"].loc[0, "IMEI"])
-marca_val = st.session_state["df_loaded"].loc[0, "Marca"]
-modelo_val = st.session_state["df_loaded"].loc[0, "Modelo"]
-usuario_val = st.session_state["df_loaded"].loc[0, "Usuario"]
+imei_val = st.session_state["df_loaded"]["IMEI"]
+marca_val = st.session_state["df_loaded"]["Marca"]
+modelo_val = st.session_state["df_loaded"]["Modelo"]
+usuario_val = st.session_state["df_loaded"]["Usuario"]
+
 
 
     # Sustituimos TODOS los placeholders con las cadenas CSS/JS definidas de forma segura.
