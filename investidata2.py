@@ -80,7 +80,8 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     # --- Si el archivo está cargado, renderizamos el Dashboard ---
     
     # Inyectamos el valor simulado del IMEI en el HTML
-    imei_val = st.session_state.df_loaded['IMEI']
+    imei_val = str(st.session_state["df_loaded"].loc[0, "IMEI"])
+
     
     # Definimos la plantilla HTML 
     # NOTA: Todos los corchetes internos de JS/D3/Tailwind config deben ser ESCAPADOS ({{ }})
@@ -779,10 +780,11 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     </html>
     """
 st.write("DEBUG → df_loaded:", st.session_state["df_loaded"])
-imei_val = st.session_state["df_loaded"]["IMEI"]
-marca_val = st.session_state["df_loaded"]["Marca"]
-modelo_val = st.session_state["df_loaded"]["Modelo"]
-usuario_val = st.session_state["df_loaded"]["Usuario"]
+imei_val = str(st.session_state["df_loaded"].loc[0, "IMEI"])
+marca_val = st.session_state["df_loaded"].loc[0, "Marca"]
+modelo_val = st.session_state["df_loaded"].loc[0, "Modelo"]
+usuario_val = st.session_state["df_loaded"].loc[0, "Usuario"]
+
 
     # Sustituimos TODOS los placeholders con las cadenas CSS/JS definidas de forma segura.
 if st.session_state["file_uploaded"]:
