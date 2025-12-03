@@ -51,7 +51,7 @@ if uploaded_file is not None:
     st.sidebar.success(f"Archivo cargado: {uploaded_file.name}")
     st.sidebar.info("Procesando datos reales...")
 
-    # Leer el Excel real correctamente
+    # Leer el Excel real
     excel_file = pd.ExcelFile(uploaded_file)
     device_info = excel_file.parse("Información del dispositivo")
 
