@@ -51,36 +51,20 @@ if uploaded_file is not None:
     st.sidebar.success(f"Archivo cargado: {uploaded_file.name}")
     st.sidebar.info("Procesando datos reales...")
 
-    # Leer el Excel real
-# Leer el Excel real
-device_info = excel_file.parse("Información del dispositivo")
+    # Leer el Excel real correctamente
+    excel_file = pd.ExcelFile(uploaded_file)
+    device_info = excel_file.parse("Información del dispositivo")
 
-# Convertir formato Nombre → Valor
-device_map = device_info.set_index("Nombre")["Valor"].to_dict()
+    # Convertir formato Nombre → Valor
+    device_dict = device_info.set_index("Nombre")["Valor"].to_dict()
 
-st.session_state["df_loaded"] = {
-    "IMEI": device_map.get("IMEI", "No encontrado"),
-    "Marca": device_map.get("Vendor", "No encontrado"),
-    "Modelo": device_map.get("Model", "No encontrado"),
-    "Usuario": device_map.get("Device Name", "No encontrado"),
-}
-
-
-# Convertir la hoja en un diccionario tipo {'IMEI': '12345', 'Model': '...', ...}
-device_dict = (
-    device_info
-    .set_index("Nombre")["Valor"]
-    .to_dict()
-)
-
-# Guardar en session_state con claves uniformes
-st.session_state["df_loaded"] = {
-    "IMEI": device_dict.get("IMEI", "No disponible"),
-    "Marca": device_dict.get("Vendor", "No disponible"),
-    "Modelo": device_dict.get("Model", "No disponible"),
-    "Usuario": device_dict.get("Device Name", "No disponible"),
-}
-
+    # Guardar en session_state con claves uniformes
+    st.session_state["df_loaded"] = {
+        "IMEI": device_dict.get("IMEI", "No disponible"),
+        "Marca": device_dict.get("Vendor", "No disponible"),
+        "Modelo": device_dict.get("Model", "No disponible"),
+        "Usuario": device_dict.get("Device Name", "No disponible"),
+    }
 
 else:
     st.session_state["file_uploaded"] = False
