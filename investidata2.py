@@ -55,19 +55,14 @@ if uploaded_file is not None:
 # Leer el Excel real
 device_info = excel_file.parse("Información del dispositivo")
 
-# Convertir a formato: {"IMEI": "354102...", "Model": "...", ...}
-device_dict = (
-    device_info
-    .set_index("Nombre")["Valor"]
-    .to_dict()
-)
+# Convertir formato Nombre → Valor
+device_map = device_info.set_index("Nombre")["Valor"].to_dict()
 
-# Guardamos usando claves estándar
 st.session_state["df_loaded"] = {
-    "IMEI": device_dict.get("IMEI", "No encontrado"),
-    "Marca": device_dict.get("Vendor", "No encontrado"),
-    "Modelo": device_dict.get("Model", "No encontrado"),
-    "Usuario": device_dict.get("Device Name", "No encontrado"),
+    "IMEI": device_map.get("IMEI", "No encontrado"),
+    "Marca": device_map.get("Vendor", "No encontrado"),
+    "Modelo": device_map.get("Model", "No encontrado"),
+    "Usuario": device_map.get("Device Name", "No encontrado"),
 }
 
 
