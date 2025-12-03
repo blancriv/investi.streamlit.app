@@ -673,7 +673,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
                         tooltip.transition()
                             .duration(200)
                             // CORRECCIÓN CLAVE: Se pasa la variable como string simple para evitar conflictos de doble llave.
-                            .style("opacity", '{{TOOLTIP_OPACITY}}'); 
+                            .style("opacity", "{{TOOLTIP_OPACITY}}"); 
                         // CORRECCIÓN: El contenido de la plantilla literal necesita ESCAPE DE LLAVES
                         tooltip.html(`Coincidencias: <strong>\${{d.count}}</strong>`)
                             .style("left", (event.pageX + 10) + "px")
