@@ -46,22 +46,22 @@ uploaded_file = st.sidebar.file_uploader(
 )
 
 if uploaded_file is not None:
-    # Simulación de procesamiento: solo cargamos un DataFrame simulado
     st.session_state.file_uploaded = True
     
-    st.sidebar.success(f"Archivo cargado: **{uploaded_file.name}**")
-    st.sidebar.info("Simulando el procesamiento de 30+ hojas de datos...")
-    
-    # Simulación de los datos cargados para que el Dashboard tenga algo que mostrar
-    mock_data = {
-        'IMEI Principal': '358945001234567',
-        'Marca': 'Samsung',
-        'Modelo': 'Galaxy S21 (SM-G991U)',
-        'Usuario': 'JRivera_user',
-        'Fecha de Extracción': '2025-05-15',
-        'Hallazgos Clave': 48,
+    st.sidebar.success(f"Archivo cargado: {uploaded_file.name}")
+    st.sidebar.info("Procesando datos reales...")
+
+    # Leer el Excel real
+    excel_file = pd.ExcelFile(uploaded_file)
+    device_info = excel_file.parse("Device_Info")
+
+    st.session_state["df_loaded"] = {
+        "IMEI": str(device_info.loc[0, "IMEI"]),
+        "Marca": device_info.loc[0, "Marca"],
+        "Modelo": device_info.loc[0, "Modelo"],
+        "Usuario": device_info.loc[0, "Usuario"],
     }
-    st.session_state.df_loaded = mock_data
+
 
 else:
     st.session_state.file_uploaded = False
