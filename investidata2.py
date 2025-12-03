@@ -52,15 +52,25 @@ if uploaded_file is not None:
     st.sidebar.info("Procesando datos reales...")
 
     # Leer el Excel real
-    excel_file = pd.ExcelFile(uploaded_file)
-    device_info = excel_file.parse("Información del dispositivo")
+# Leer el Excel real
+excel_file = pd.ExcelFile(uploaded_file)
+device_info = excel_file.parse("Información del dispositivo")
 
-    st.session_state["df_loaded"] = {
-        "IMEI": str(device_info.loc[0, "IMEI"]),
-        "Marca": device_info.loc[0, "Marca"],
-        "Modelo": device_info.loc[0, "Modelo"],
-        "Usuario": device_info.loc[0, "Usuario"],
-    }
+# Convertir la hoja en un diccionario tipo {'IMEI': '12345', 'Model': '...', ...}
+device_dict = (
+    device_info
+    .set_index("Nombre")["Valor"]
+    .to_dict()
+)
+
+# Guardar en session_state con claves uniformes
+st.session_state["df_loaded"] = {
+    "IMEI": device_dict.get("IMEI", "No disponible"),
+    "Marca": device_dict.get("Vendor", "No disponible"),
+    "Modelo": device_dict.get("Model", "No disponible"),
+    "Usuario": device_dict.get("Device Name", "No disponible"),
+}
+
 
 else:
     st.session_state["file_uploaded"] = False
