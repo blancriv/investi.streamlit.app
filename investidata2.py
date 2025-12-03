@@ -789,11 +789,12 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     TOOLTIP_OPACITY=TOOLTIP_OPACITY_VAL
     )
 
-    components.html(
-        FINAL_HTML,
+   components.html(
+        HTML_FINAL,
         height=1200,
         scrolling=True
     )
+
     
 else:
     # --- Mensaje de bienvenida/instrucción si no hay archivo cargado ---
