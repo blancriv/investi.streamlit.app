@@ -84,7 +84,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     
     # Definimos la plantilla HTML 
     # NOTA: Todos los corchetes internos de JS/D3/Tailwind config deben ser ESCAPADOS ({{ }})
-    HTML_TEMPLATE = f"""
+    HTML_TEMPLATE = """
     <!DOCTYPE html>
     <html lang="es">
     <head>
