@@ -80,7 +80,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     # --- Si el archivo está cargado, renderizamos el Dashboard ---
     
     # Inyectamos el valor simulado del IMEI en el HTML
-    imei_val = st.session_state.df_loaded['IMEI Principal']
+    imei_val = st.session_state.df_loaded['IMEI']
     
     # Definimos la plantilla HTML 
     # NOTA: Todos los corchetes internos de JS/D3/Tailwind config deben ser ESCAPADOS ({{ }})
