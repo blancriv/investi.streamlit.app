@@ -778,6 +778,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     </body>
     </html>
     """
+st.write("DEBUG → df_loaded:", st.session_state["df_loaded"])
 imei_val = st.session_state["df_loaded"]["IMEI"]
 marca_val = st.session_state["df_loaded"]["Marca"]
 modelo_val = st.session_state["df_loaded"]["Modelo"]
