@@ -82,7 +82,8 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     # --- Si el archivo está cargado, renderizamos el Dashboard ---
     
     # Inyectamos el valor simulado del IMEI en el HTML
-    imei_val = str(st.session_state["df_loaded"].loc[0, "IMEI"])
+    imei_val = st.session_state["df_loaded"]["IMEI"]
+
 
     
     # Definimos la plantilla HTML 
