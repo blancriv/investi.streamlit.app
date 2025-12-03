@@ -29,10 +29,10 @@ TOOLTIP_OPACITY_VAL = "0.9"
 st.set_page_config(layout="wide", page_title="InvestiData Forense")
 
 # --- Estado de la Sesión para manejar la carga ---
-if 'file_uploaded' not in st.session_state:
-    st.session_state.file_uploaded = False
-if 'df_loaded' not in st.session_state:
-    st.session_state.df_loaded = None
+if "file_uploaded" not in st.session_state:
+    st.session_state["file_uploaded"] = False
+if "df_loaded" not in st.session_state:
+    st.session_state["df_loaded"] = None
 
 
 # --- SIDEBAR: Carga de Archivo ---
@@ -46,7 +46,7 @@ uploaded_file = st.sidebar.file_uploader(
 )
 
 if uploaded_file is not None:
-    st.session_state.file_uploaded = True
+    st.session_state["file_uploaded"] = True
     
     st.sidebar.success(f"Archivo cargado: {uploaded_file.name}")
     st.sidebar.info("Procesando datos reales...")
@@ -55,7 +55,6 @@ if uploaded_file is not None:
     excel_file = pd.ExcelFile(uploaded_file)
     device_info = excel_file.parse("Información del dispositivo")
 
-
     st.session_state["df_loaded"] = {
         "IMEI": str(device_info.loc[0, "IMEI"]),
         "Marca": device_info.loc[0, "Marca"],
@@ -63,12 +62,10 @@ if uploaded_file is not None:
         "Usuario": device_info.loc[0, "Usuario"],
     }
 
-
 else:
-    st.session_state.file_uploaded = False
-    st.session_state.df_loaded = None
+    st.session_state["file_uploaded"] = False
+    st.session_state["df_loaded"] = None
     st.sidebar.warning("Esperando la carga del archivo XLSX.")
-
 
 # -----------------------------------------------------------------------------
 # 3. Contenido Principal del Dashboard
