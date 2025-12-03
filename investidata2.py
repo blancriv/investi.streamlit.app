@@ -778,17 +778,26 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     </body>
     </html>
     """
+imei_val = st.session_state["df_loaded"]["IMEI"]
+marca_val = st.session_state["df_loaded"]["Marca"]
+modelo_val = st.session_state["df_loaded"]["Modelo"]
+usuario_val = st.session_state["df_loaded"]["Usuario"]
 
     # Sustituimos TODOS los placeholders con las cadenas CSS/JS definidas de forma segura.
-    HTML_FINAL = (
-        HTML_TEMPLATE
-            .replace("{DEFAULT_SHADOW}", DEFAULT_SHADOW_CSS)
-            .replace("{HOVER_SHADOW}", HOVER_SHADOW_CSS)
-            .replace("{TRANSITION_SHORT}", TRANSITION_TIME_SHORT)
-            .replace("{TRANSITION_MEDIUM}", TRANSITION_TIME_MEDIUM)
-            .replace("{FONT_SIZE}", FONT_SIZE_TOOLTIP)
-            .replace("{TOOLTIP_OPACITY}", TOOLTIP_OPACITY_VAL)
-    )
+HTML_FINAL = (
+    HTML_TEMPLATE
+        .replace("{{IMEI_VAL}}", imei_val)
+        .replace("{{MARCA_VAL}}", marca_val)
+        .replace("{{MODELO_VAL}}", modelo_val)
+        .replace("{{USUARIO_VAL}}", usuario_val)
+        .replace("{DEFAULT_SHADOW}", DEFAULT_SHADOW_CSS)
+        .replace("{HOVER_SHADOW}", HOVER_SHADOW_CSS)
+        .replace("{TRANSITION_SHORT}", TRANSITION_TIME_SHORT)
+        .replace("{TRANSITION_MEDIUM}", TRANSITION_TIME_MEDIUM)
+        .replace("{FONT_SIZE}", FONT_SIZE_TOOLTIP)
+        .replace("{TOOLTIP_OPACITY}", TOOLTIP_OPACITY_VAL)
+)
+
 
     components.html(
         HTML_FINAL,
