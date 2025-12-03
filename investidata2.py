@@ -779,7 +779,9 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     </body>
     </html>
     """
-st.write("DEBUG → df_loaded:", st.session_state["df_loaded"])
+st.write("DEBUG TYPE:", type(st.session_state.get("df_loaded")))
+st.write("DEBUG VALUE:", st.session_state.get("df_loaded"))
+
 imei_val = str(st.session_state["df_loaded"].loc[0, "IMEI"])
 marca_val = st.session_state["df_loaded"].loc[0, "Marca"]
 modelo_val = st.session_state["df_loaded"].loc[0, "Modelo"]
