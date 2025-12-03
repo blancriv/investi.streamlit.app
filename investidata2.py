@@ -52,8 +52,9 @@ if uploaded_file is not None:
     st.sidebar.info("Procesando datos reales...")
 
     # Leer el Excel real
-    excel_file = pd.ExcelFile(uploaded_file)
-    device_info = excel_file.parse("Device_Info")
+excel_file = pd.ExcelFile(uploaded_file)
+device_info = excel_file.parse("Información del dispositivo")
+
 
     st.session_state["df_loaded"] = {
         "IMEI": str(device_info.loc[0, "IMEI"]),
