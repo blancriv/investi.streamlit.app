@@ -780,7 +780,7 @@ if st.session_state.file_uploaded and st.session_state.df_loaded:
     """
 
     # Sustituimos TODOS los placeholders con las cadenas CSS/JS definidas de forma segura.
-    HTML_FINAL = PLANTILLA_HTML.format(
+    HTML_FINAL = HTML_TEMPLATE.format(
     DEFAULT_SHADOW=DEFAULT_SHADOW_CSS,
     HOVER_SHADOW=HOVER_SHADOW_CSS,
     TRANSITION_SHORT=TRANSITION_TIME_SHORT,
